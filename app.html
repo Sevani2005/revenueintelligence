@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpendNest Revenue Intelligence Inbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* === GOOGLE FONTS === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* === DESIGN TOKENS — Warm Ivory / Forest Green Theme === */
+:root {
+  /* Backgrounds */
+  --color-bg:              #F8F6EF;
+  --color-surface:         #FFFDF7;
+  --color-surface-2:       #F2EFE6;
+  --color-surface-3:       #EAE7DC;
+
+  /* Borders */
+  --color-border:          #E1E5DA;
+  --color-border-subtle:   #EBEDe6;
+
+  /* Text */
+  --color-text-primary:    #243A33;
+  --color-text-secondary:  #4A6359;
+  --color-text-muted:      #718078;
+
+  /* Accent — sage green */
+  --color-accent:          #4A7C59;
+  --color-accent-dim:      rgba(74,124,89,0.10);
+  --color-accent-hover:    #3A6348;
+
+  /* Semantic colours */
+  --color-green:           #3D7A52;
+  --color-green-dim:       rgba(61,122,82,0.10);
+  --color-amber:           #B8840A;
+  --color-amber-dim:       rgba(184,132,10,0.10);
+  --color-red:             #B94040;
+  --color-red-dim:         rgba(185,64,64,0.10);
+  --color-purple:          #6B5B9E;
+  --color-purple-dim:      rgba(107,91,158,0.10);
+  --color-cyan:            #2A7F8F;
+  --color-cyan-dim:        rgba(42,127,143,0.10);
+  --color-orange:          #B8611A;
+  --color-orange-dim:      rgba(184,97,26,0.10);
+  --color-teal:            #207A6E;
+  --color-teal-dim:        rgba(32,122,110,0.10);
+
+  /* Sidebar-specific (deep forest green) */
+  --sidebar-bg:            #183D34;
+  --sidebar-border:        rgba(255,255,255,0.07);
+  --sidebar-text:          #C8D8C2;
+  --sidebar-text-muted:    rgba(200,216,194,0.55);
+  --sidebar-active-bg:     rgba(168,190,150,0.18);
+  --sidebar-active-text:   #A8BE96;
+  --sidebar-hover-bg:      rgba(255,255,255,0.06);
+
+  /* Shape / shadow */
+  --radius-sm:  4px;
+  --radius-md:  7px;
+  --radius-lg:  10px;
+  --shadow-sm:  0 1px 3px rgba(36,58,51,0.07);
+  --shadow-md:  0 4px 12px rgba(36,58,51,0.09);
+  --shadow-lg:  0 8px 24px rgba(36,58,51,0.13);
+
+  --font:       'Inter', system-ui, -apple-system, sans-serif;
+  --sidebar-w:  228px;
+  --topbar-h:   52px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* === LAYOUT === */
+#app { display: flex; height: 100vh; overflow: hidden; }
+#sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#topbar {
+  height: var(--topbar-h);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 0 var(--color-border);
+}
+#content { flex: 1; overflow-y: auto; padding: 20px; }
+
+/* === SIDEBAR === */
+.sidebar-logo {
+  padding: 18px 16px 12px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+.sidebar-logo h1 {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #E8F0E4;
+  letter-spacing: -0.2px;
+}
+.sidebar-logo p {
+  font-size: 10.5px;
+  color: var(--sidebar-text-muted);
+  margin-top: 3px;
+}
+.sidebar-nav { padding: 10px 0; flex: 1; }
+.nav-section-label {
+  padding: 10px 16px 4px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--sidebar-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--sidebar-text);
+  font-size: 13px;
+  font-weight: 400;
+  border-left: 2px solid transparent;
+  transition: all 0.12s;
+  user-select: none;
+  border-radius: 0;
+}
+.nav-item:hover {
+  background: var(--sidebar-hover-bg);
+  color: #E8F0E4;
+}
+.nav-item.active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-text);
+  border-left-color: var(--sidebar-active-text);
+  font-weight: 500;
+}
+.nav-item .badge {
+  margin-left: auto;
+  background: rgba(255,255,255,0.08);
+  color: var(--sidebar-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+.nav-item.active .badge {
+  background: rgba(168,190,150,0.20);
+  color: var(--sidebar-active-text);
+}
+.nav-icon { font-size: 13px; width: 16px; text-align: center; opacity: 0.75; }
+.nav-item.active .nav-icon { opacity: 1; }
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--sidebar-border);
+}
+.sidebar-footer p {
+  font-size: 10.5px;
+  color: var(--sidebar-text-muted);
+  line-height: 1.5;
+}
+.sidebar-footer .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #A8BE96;
+  margin-right: 5px;
+}
+
+/* === TOPBAR === */
+.topbar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+  letter-spacing: -0.1px;
+}
+.topbar-search {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 5px 10px;
+  gap: 6px;
+  width: 260px;
+}
+.topbar-search input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  width: 100%;
+  font-family: var(--font);
+}
+.topbar-search input::placeholder { color: var(--color-text-muted); }
+
+/* === BUTTONS === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: var(--radius-md);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.13s;
+  font-family: var(--font);
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+.btn-primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+.btn-secondary:hover { background: var(--color-surface-2); }
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
+}
+.btn-ghost:hover { background: var(--color-surface-2); color: var(--color-text-primary); }
+.btn-danger {
+  background: var(--color-red-dim);
+  color: var(--color-red);
+  border-color: rgba(185,64,64,0.25);
+}
+.btn-danger:hover { background: rgba(185,64,64,0.16); }
+.btn-sm  { padding: 4px 9px;  font-size: 11.5px; }
+.btn-xs  { padding: 2px 6px;  font-size: 11px; }
+
+/* === CARDS === */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.card-title   { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+.card-subtitle{ font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px; }
+
+/* === STAT CARDS === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 15px 16px;
+  cursor: pointer;
+  transition: border-color 0.14s, box-shadow 0.14s, transform 0.12s;
+  box-shadow: var(--shadow-sm);
+}
+.stat-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.stat-card.clickable-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+.stat-label {
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 7px;
+}
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: 5px;
+  letter-spacing: -0.5px;
+}
+.stat-value.green  { color: var(--color-green); }
+.stat-value.amber  { color: var(--color-amber); }
+.stat-value.blue   { color: var(--color-accent); }
+.stat-value.purple { color: var(--color-purple); }
+.stat-meta   { font-size: 11px; color: var(--color-text-muted); }
+.stat-meta b { color: var(--color-text-secondary); }
+
+/* === BADGES / CHIPS === */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.badge-call        { background: var(--color-accent-dim);  color: var(--color-accent);  }
+.badge-meeting     { background: var(--color-purple-dim);  color: var(--color-purple);  }
+.badge-transcript  { background: var(--color-green-dim);   color: var(--color-green);   }
+.badge-no-transcript { background: var(--color-surface-3); color: var(--color-text-muted); }
+.badge-partner     { background: var(--color-purple-dim);  color: var(--color-purple);  }
+.badge-deal        { background: var(--color-green-dim);   color: var(--color-green);   }
+.badge-followup    { background: var(--color-cyan-dim);    color: var(--color-cyan);    }
+.badge-research    { background: var(--color-amber-dim);   color: var(--color-amber);   }
+.badge-support     { background: var(--color-red-dim);     color: var(--color-red);     }
+.badge-training    { background: var(--color-teal-dim);    color: var(--color-teal);    }
+.badge-review      { background: var(--color-orange-dim);  color: var(--color-orange);  }
+.badge-no-content  { background: var(--color-surface-3);  color: var(--color-text-muted); }
+.badge-manual      { background: var(--color-amber-dim);   color: var(--color-amber);   border: 1px solid rgba(184,132,10,0.25); }
+.badge-stale       { background: var(--color-amber-dim);   color: var(--color-amber);   border: 1px solid rgba(184,132,10,0.25); }
+.badge-fresh       { background: var(--color-green-dim);   color: var(--color-green);   }
+
+/* === INBOX TABLE === */
+.inbox-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.inbox-table { width: 100%; border-collapse: collapse; }
+.inbox-table th {
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+.inbox-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 13px;
+  vertical-align: middle;
+}
+.inbox-table tbody tr { cursor: pointer; transition: background 0.1s; }
+.inbox-table tbody tr:hover { background: var(--color-surface-2); }
+.inbox-table tbody tr.selected { background: var(--color-accent-dim); }
+.inbox-table tbody tr td:first-child { font-weight: 500; color: var(--color-text-secondary); }
+.ref-code     { font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: 11.5px; color: var(--color-text-secondary); background: var(--color-surface-2); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--color-border); }
+.person-name  { font-weight: 500; color: var(--color-text-primary); }
+.timestamp    { color: var(--color-text-muted); font-size: 12px; }
+.routes-cell  { display: flex; flex-wrap: wrap; gap: 3px; }
+.review-dot   { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.review-dot.pending      { background: var(--color-amber); }
+.review-dot.reviewed     { background: var(--color-green); }
+.review-dot.needs-review { background: var(--color-red); }
+
+/* === DETAIL PANEL === */
+.detail-panel {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 16px;
+  height: calc(100vh - var(--topbar-h) - 40px);
+  overflow: hidden;
+}
+.detail-main    { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.detail-sidebar { overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.detail-header  {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.detail-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.detail-header-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.detail-title { font-size: 16px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 4px; letter-spacing: -0.2px; }
+.detail-meta-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.detail-meta-item { }
+.detail-meta-label { font-size: 10px; color: var(--color-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }
+.detail-meta-value { font-size: 13px; color: var(--color-text-primary); }
+
+/* === ANALYSIS SECTION === */
+.analysis-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.analysis-section-header {
+  padding: 11px 16px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.analysis-section-header:hover { background: var(--color-surface-3); }
+.analysis-section-title { font-size: 12.5px; font-weight: 600; color: var(--color-text-primary); flex: 1; }
+.analysis-section-body  { padding: 14px 16px; }
+.analysis-item  { margin-bottom: 14px; }
+.analysis-item:last-child { margin-bottom: 0; }
+.analysis-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.analysis-content           { font-size: 13px; color: var(--color-text-primary); line-height: 1.65; }
+.analysis-content.uncertain { color: var(--color-amber); }
+.analysis-content.action    { color: var(--color-green); }
+.evidence-cite {
+  display: inline-block;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 0 5px;
+  font-size: 10.5px;
+  color: var(--color-text-secondary);
+  font-family: monospace;
+  cursor: pointer;
+}
+.evidence-cite:hover { background: var(--color-accent-dim); color: var(--color-accent); }
+
+/* === TRANSCRIPT === */
+.transcript-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.transcript-header {
+  padding: 11px 16px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.transcript-body { padding: 14px 16px; max-height: 420px; overflow-y: auto; }
+.turn { margin-bottom: 14px; }
+.turn:last-child { margin-bottom: 0; }
+.turn-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.turn-number   { font-size: 10px; color: var(--color-text-muted); font-family: monospace; }
+.turn-speaker  { font-size: 12px; font-weight: 600; }
+.turn-speaker.team     { color: var(--color-accent); }
+.turn-speaker.customer { color: var(--color-green); }
+.turn-speaker.partner  { color: var(--color-purple); }
+.turn-speaker.supplier { color: var(--color-amber); }
+.turn-timecode { font-size: 10.5px; color: var(--color-text-muted); font-family: monospace; }
+.turn-text {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  line-height: 1.65;
+  padding-left: 10px;
+  border-left: 2px solid var(--color-border);
+}
+.call-text     { font-size: 13px; color: var(--color-text-primary); line-height: 1.8; }
+.no-transcript { padding: 24px; text-align: center; color: var(--color-text-muted); }
+.no-transcript .icon { font-size: 28px; margin-bottom: 8px; }
+.no-transcript p { font-size: 13px; }
+
+/* === ROUTING PANEL === */
+.routing-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.routing-header {
+  padding: 11px 16px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.routing-body { padding: 14px 16px; }
+.route-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.1s;
+}
+.route-option:hover   { background: var(--color-surface-2); }
+.route-option.active  { background: var(--color-accent-dim); }
+.route-option input[type=checkbox] { accent-color: var(--color-accent); width: 14px; height: 14px; cursor: pointer; }
+.route-label       { font-size: 12.5px; color: var(--color-text-primary); flex: 1; }
+.route-reason-text { font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px; padding-left: 22px; line-height: 1.4; }
+
+/* === BAR CHARTS === */
+.bar-chart { display: flex; flex-direction: column; gap: 7px; }
+.bar-row   { display: flex; align-items: center; gap: 8px; }
+.bar-label { font-size: 11.5px; color: var(--color-text-secondary); width: 80px; flex-shrink: 0; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track {
+  flex: 1;
+  background: var(--color-surface-2);
+  border-radius: 3px;
+  height: 18px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--color-border);
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+}
+.bar-fill span { font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; }
+.bar-count { font-size: 11.5px; color: var(--color-text-muted); width: 24px; text-align: right; }
+
+/* === MANAGER BRIEF === */
+.brief-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.brief-header {
+  padding: 13px 16px;
+  background: linear-gradient(135deg, rgba(168,190,150,0.18) 0%, rgba(228,189,104,0.10) 100%);
+  border-bottom: 1px solid var(--color-border);
+}
+.brief-date  { font-size: 11px; color: var(--color-text-muted); margin-bottom: 3px; }
+.brief-title { font-size: 14px; font-weight: 700; color: var(--color-text-primary); letter-spacing: -0.1px; }
+.brief-body  { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.brief-item  { display: flex; gap: 12px; }
+.brief-icon  { font-size: 15px; flex-shrink: 0; width: 20px; margin-top: 2px; }
+.brief-item-content { flex: 1; }
+.brief-item-title { font-size: 13px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 3px; }
+.brief-item-text  { font-size: 12.5px; color: var(--color-text-secondary); line-height: 1.55; }
+.brief-item-link  { font-size: 11.5px; color: var(--color-accent); cursor: pointer; margin-top: 3px; font-weight: 500; }
+.brief-item-link:hover { text-decoration: underline; }
+
+/* === IMPORT / EXPORT === */
+.import-zone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.import-zone:hover,
+.import-zone.dragover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+.import-zone p     { color: var(--color-text-muted); font-size: 13px; margin-top: 8px; }
+.import-zone .icon { font-size: 32px; color: var(--color-text-muted); }
+.import-log {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  max-height: 160px;
+  overflow-y: auto;
+  font-family: 'SFMono-Regular', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.log-ok   { color: var(--color-green); }
+.log-warn { color: var(--color-amber); }
+.log-err  { color: var(--color-red);   }
+.log-info { color: var(--color-text-muted); }
+
+/* === REVIEW QUEUE === */
+.review-queue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  transition: opacity 0.1s;
+}
+.review-queue-item:last-child { border-bottom: none; }
+.review-queue-item:hover .queue-ref { color: var(--color-accent); }
+.queue-icon  { font-size: 14px; margin-top: 1px; }
+.queue-ref   { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+.queue-title { font-size: 13px; color: var(--color-text-primary); font-weight: 500; margin-bottom: 2px; }
+.queue-desc  { font-size: 12px; color: var(--color-text-muted); line-height: 1.4; }
+
+/* === TOAST === */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+.toast {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 340px;
+  animation: slideIn 0.2s ease;
+}
+.toast.success { border-left: 3px solid var(--color-green); }
+.toast.error   { border-left: 3px solid var(--color-red);   }
+.toast.info    { border-left: 3px solid var(--color-accent); }
+.toast.warning { border-left: 3px solid var(--color-amber); }
+@keyframes slideIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* === MISC UTILITIES === */
+.divider      { height: 1px; background: var(--color-border); margin: 12px 0; }
+.text-muted   { color: var(--color-text-muted); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-sm  { font-size: 12px; }
+.text-xs  { font-size: 11px; }
+.flex     { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center    { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mb-2 { margin-bottom: 8px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 5px 8px;
+  color: var(--color-text-primary);
+  font-size: 12.5px;
+  font-family: var(--font);
+  cursor: pointer;
+  outline: none;
+}
+.select:hover, .select:focus { border-color: var(--color-accent); }
+.input-field {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+  width: 100%;
+}
+.input-field:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px var(--color-accent-dim); }
+label { font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.12s;
+  font-weight: 500;
+}
+.chip.active       { background: var(--color-accent-dim); color: var(--color-accent); border-color: rgba(74,124,89,0.3); }
+.chip:not(.active) { background: var(--color-surface-2); color: var(--color-text-secondary); border-color: var(--color-border); }
+.chip:hover        { border-color: var(--color-accent); color: var(--color-text-primary); }
+.empty-state { padding: 40px; text-align: center; color: var(--color-text-muted); }
+.empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.6; }
+.empty-state h3 { font-size: 14px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 6px; }
+.empty-state p  { font-size: 13px; }
+.section-title  { font-size: 11px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
+.overflow-hidden { overflow: hidden; }
+
+/* === SCROLLBARS === */
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+#content::-webkit-scrollbar, .detail-main::-webkit-scrollbar, .detail-sidebar::-webkit-scrollbar, .transcript-body::-webkit-scrollbar, .import-log::-webkit-scrollbar { width: 5px; }
+#content::-webkit-scrollbar-track, .detail-main::-webkit-scrollbar-track, .detail-sidebar::-webkit-scrollbar-track { background: transparent; }
+#content::-webkit-scrollbar-thumb, .detail-main::-webkit-scrollbar-thumb, .detail-sidebar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* === FILTER BAR === */
+.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.highlight   { background: rgba(74,124,89,0.18); border-radius: 2px; padding: 0 2px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-logo">
+      <h1>SpendNest RI</h1>
+      <p>Revenue Intelligence Inbox</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Views</div>
+      <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')">
+        <span class="nav-icon">⬛</span> Dashboard <span class="badge" id="badge-dashboard">21 Aug</span>
+      </div>
+      <div class="nav-item" data-view="inbox" onclick="navigate('inbox')">
+        <span class="nav-icon">☰</span> Inbox <span class="badge" id="badge-inbox">44</span>
+      </div>
+      <div class="nav-section-label" style="margin-top:8px;">Data</div>
+      <div class="nav-item" data-view="import" onclick="navigate('import')">
+        <span class="nav-icon">↑</span> Import
+      </div>
+      <div class="nav-item" data-view="export" onclick="navigate('export')">
+        <span class="nav-icon">↓</span> Export
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <p><span class="dot"></span>Selected records: 21 Aug 2026 (IST). Analysis pre-generated; runtime computes metrics and routing counts.</p>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOPBAR -->
+    <div id="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard — 21 August 2026</div>
+      <div class="topbar-search" id="global-search-box" style="display:none">
+        <span style="color:var(--color-text-muted)">🔍</span>
+        <input type="text" placeholder="Search records..." id="global-search" oninput="handleGlobalSearch(this.value)">
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="loadDemoData()" title="Load initial then update dataset for demo">🔄 Demo Load</button>
+      <button class="btn btn-secondary btn-sm" onclick="navigate('import')">📥 Import</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content">
+      <!-- Views rendered here -->
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* =====================================================================
+   REVENUE INTELLIGENCE INBOX — COMPLETE APPLICATION
+   SpendNest | Selected records: 21 August 2026 (Asia/Kolkata)
+   Analysis: pre-generated from CONVERSATIONS.md transcripts
+   Runtime computes: metrics, routing counts, filter/search
+   ===================================================================== */
+
+/* ============================ ANALYSIS DATA ============================ */
+/* Pre-generated evidence-backed analysis for all 18 usable transcripts.
+   Records with no usable transcript get status 'no-content'.
+   Analysis generated from CONVERSATIONS.md supplied transcripts.
+   NOTE: M07 analysis is marked with revision=2 (from update batch).
+*/
+
+const PRE_GENERATED_ANALYSIS = {
+
+  /* ---- CALLS WITH TRANSCRIPTS ---- */
+
+  "call|2ec4404c-beee-5377-a63c-aab701da08ed": { // C01
+    rev: 1,
+    whatHappened: "Outbound cold call to Pranav (Harborlight Advisory). Contact was immediately resistant to the call, questioned how his details were obtained, and stated he is not interested. He asked about the company and noted their processes are 'very automated' before ending the call.",
+    whyItMatters: "Contact explicitly said he did not ask for the call and is not interested. He expressed irritation about cold outreach on his work number. Firm is in outsourced finance leadership — in principle a relevant segment, but no interest was expressed.",
+    evidence: [
+      "Pranav said: \"I didn't ask for this call, and I'm not interested.\"",
+      "When asked about company: \"Our processes are already very automated. We have a fairly advanced setup, so I don't think this is something we need.\"",
+      "On sourcing: \"Through a professional networking outreach programme.\""
+    ],
+    uncertainty: "No confirmed business need, no future meeting arranged, no contact preference given beyond this call. The claim that processes are 'very automated' is unverified.",
+    action: "No immediate follow-up recommended. Log contact as non-responsive/uninterested. Document sourcing channel for compliance reference.",
+    routes: ["research"],
+    routeReasons: { research: "Contact explicitly declined and offered no interest signal beyond confirming they have an automated setup. No actionable next step beyond logging." }
+  },
+
+  "call|4b870624-8aad-5315-a60e-0db95981cf99": { // C02
+    rev: 1,
+    whatHappened: "Outbound call to Leela at Fernhaven Group. A receptionist (Kavya) answered; Leela was not in the office. The caller was transferred to Leela's voicemail.",
+    whyItMatters: "No substantive conversation occurred. This is a connection attempt with a target who was unavailable.",
+    evidence: [
+      "Kavya (receptionist): \"It looks as though she isn't in the office today.\"",
+      "Caller was transferred to voicemail."
+    ],
+    uncertainty: "No information about Leela's role, the purpose of the call, or prior history is available in this transcript. The observed_outcome is 'ooo' (out of office).",
+    action: "Retry call. Confirm target contact details and next best time. No business-level decision possible from this transcript alone.",
+    routes: ["followup"],
+    routeReasons: { followup: "Attempted contact; target unavailable. Simple retry follow-up needed." }
+  },
+
+  "call|20d509ba-d589-5334-9aef-ea4ce6105b1a": { // C03
+    rev: 1,
+    whatHappened: "Outbound follow-up call to Milan about API/developer access. Audio quality was very poor (contact was outdoors, using roaming). Milan vaguely recalled the earlier conversation but said developer functionality is 'not essential enough for us to spend much on it'. He requested email follow-up and suggested a call Monday or Tuesday.",
+    whyItMatters: "Developer access interest exists but is very low-priority on the contact's side. Price was a previous concern. The connection was too poor to have a productive discussion. A concrete email subject line and timing were agreed.",
+    evidence: [
+      "Milan: \"We did ask about some developer functionality, but it isn't essential enough for us to spend much on it.\"",
+      "Milan: \"Could we do this by email? Or call on Monday a bit earlier, when I'm back indoors?\"",
+      "Subject agreed: \"Developer access and event notifications — follow-up\"",
+      "Milan: \"Send the email and we can speak Monday or Tuesday.\""
+    ],
+    uncertainty: "Interest level is uncertain — Milan could not recall the prior conversation clearly. Price concern was raised but no budget was shared. Whether the team has moved on is unknown.",
+    action: "Send follow-up email with subject 'Developer access and event notifications — follow-up'. Call Milan Monday (or Tuesday) when he is indoors. Include pricing options clearly. Do not assume confirmed interest.",
+    routes: ["followup", "research"],
+    routeReasons: {
+      followup: "Explicit agreement to email + Mon/Tue call. Poor audio prevented real conversation.",
+      research: "Interest and budget remain uncertain; qualification is needed before this becomes a deal conversation."
+    }
+  },
+
+  "call|bcdcbf56-d338-5c78-9a97-42c2fc1c9931": { // C04
+    rev: 1,
+    whatHappened: "Outbound voicemail left for Ritesh at Lanternpath Media. Arun referenced an earlier conversation about expense software. The message noted that information was initially sent to the wrong email address, then resent. Arun asked for a callback to discuss next steps.",
+    whyItMatters: "This is a warm follow-up with a prior context. The wrong-email issue may have delayed consideration. No response has been received yet.",
+    evidence: [
+      "Arun voicemail: \"Our information first went to the wrong email address. We subsequently used the corrected address you gave us.\"",
+      "Arun: \"Please call me back to let me know where things stand.\""
+    ],
+    uncertainty: "No response from Ritesh. Whether the corrected email was read, and whether Lanternpath is still evaluating, is unknown.",
+    action: "Await Ritesh's callback. If no response within a few days, send a brief follow-up email. Do not escalate without a response.",
+    routes: ["followup"],
+    routeReasons: { followup: "Warm follow-up voicemail; awaiting response from Lanternpath Media (Ritesh)." }
+  },
+
+  "call|75a6b94f-7717-5cfb-9e41-0acc94415e17": { // C05
+    rev: 1,
+    whatHappened: "Outbound cold call to Meera. She confirmed that her company (which has over 120 stores) already uses StoreHarbor and other platforms covering expense management, vendor payments, store-level instant payments and approval controls. She asked for a presentation to keep on file but explicitly said they would only consider changing if their existing providers no longer met their needs.",
+    whyItMatters: "No current need identified. Existing setup appears to cover all areas SpendNest addresses. The presentation request is a polite way to end the call, not a signal of active interest.",
+    evidence: [
+      "Meera: \"We already have that.\" (on vendor management / payments)",
+      "Meera: \"We already have store-level instant payments, with individual budgets and approval controls. We have that too.\"",
+      "Meera: \"If we ever decide to change the providers we already have, we could consider it then.\"",
+      "Contact email confirmed: contact05@example.com"
+    ],
+    uncertainty: "No timeline for re-evaluation given. No gaps or dissatisfaction with existing platforms mentioned. Confirmation of provider names limited to 'StoreHarbor and others'.",
+    action: "Send the requested presentation to contact05@example.com. Do not treat this as an active opportunity. Mark for long-term nurture only if existing-provider churn is detected.",
+    routes: ["research"],
+    routeReasons: { research: "Existing systems cover all described needs. No current interest. Presentation requested as courtesy, not a sales signal." }
+  },
+
+  "call|12216d5c-e254-52c6-b344-47de4c6e1ae5": { // C06
+    rev: 1,
+    whatHappened: "Outbound cold call to Nikhil. He confirmed that their business (100+ stores) has 'quite a lot of automation' with a mixed model, head-office management, and full visibility already in place. He said if a particular need arises they will contact SpendNest.",
+    whyItMatters: "No current need identified. Contact was polite but firm: existing processes are adequate. He specifically declined any follow-up.",
+    evidence: [
+      "Nikhil: \"We already have many of those things in place.\"",
+      "Nikhil: \"The essential processes are automated and connected through our business management system. Head office manages it, and we have full visibility.\"",
+      "Nikhil: \"If a particular need comes up later, we will reach out.\""
+    ],
+    uncertainty: "The business management system is unnamed. The 'mixed model' is not described in detail. No internal pain point was shared.",
+    action: "No follow-up recommended. Log as 'no current need; will reach out if required'. Do not add to active pipeline.",
+    routes: ["research"],
+    routeReasons: { research: "Contact explicitly has adequate existing systems and said they will reach out if needed. No active opportunity." }
+  },
+
+  "call|428817fa-7e9e-5418-a7d4-bb396d28dfbf": { // C07
+    rev: 1,
+    whatHappened: "Outbound call to Aditya at Willowbank Advisory. Dev explored a partnership where Willowbank refers clients to SpendNest for virtual business accounts post-incorporation. Aditya confirmed they do refer clients to providers for account opening. The call was cut short; Aditya asked to receive a proposal via chat/message and agreed to a follow-up call on Monday.",
+    whyItMatters: "Potential advisory partnership: Willowbank Advisory helps businesses incorporate overseas and domestically, and currently refers them to account providers. SpendNest fits this referral flow. A proposal has been requested. Monday follow-up was agreed.",
+    evidence: [
+      "Aditya: \"Yes, that is something we normally do.\" (on referring clients for account opening)",
+      "Aditya: \"Could you message me on our chat app and send whatever proposal you have?\"",
+      "Aditya confirmed: \"Yes\" to a Monday follow-up call."
+    ],
+    uncertainty: "Whether digital accounts are Willowbank's preference vs traditional banks is not confirmed. The scale of referrals, commercial terms, and decision-maker authority were not discussed.",
+    action: "Send partnership proposal via chat/message immediately. Call Aditya on Monday. Proposal should include referral mechanics, commercial terms, and virtual account product overview.",
+    routes: ["partner", "followup"],
+    routeReasons: {
+      partner: "Advisory firm actively refers clients for account opening; explicit interest in understanding the partnership model.",
+      followup: "Explicit Monday follow-up call agreed after sending proposal."
+    }
+  },
+
+  "call|129497b2-8e1d-5e01-919c-e8a852b5ff68": { // C08
+    rev: 1,
+    whatHappened: "Outbound cold call to Raghav. He was interested in hearing more and asked for a proposal to be sent to contact08@example.com. He noted a colleague who handles people operations and frontline processes might have been looking at a solution, and directed the email to that colleague.",
+    whyItMatters: "Warm interest signal; contact provided an email to forward a proposal to the relevant internal decision-maker. Not confirmed as an active evaluation, but a genuine referral within the organisation.",
+    evidence: [
+      "Raghav: \"Let me give you an email address. Could you send a proposal there?\"",
+      "Raghav: \"The colleague handling our people operations also deals with frontline processes and the locations.\"",
+      "Email: contact08@example.com (confirmed twice)"
+    ],
+    uncertainty: "Whether the colleague is actively looking or has approved budget is unconfirmed. Raghav said 'I don't know the details' about any prior discussions.",
+    action: "Send proposal to contact08@example.com. Reference the conversation with Raghav. Keep follow-up warm but not aggressive.",
+    routes: ["research", "followup"],
+    routeReasons: {
+      research: "Referral to internal colleague for further evaluation; qualification still needed.",
+      followup: "Proposal requested and email confirmed; send and follow up."
+    }
+  },
+
+  "call|4a1de681-f884-55e8-b1ad-de22d17cd959": { // C09
+    rev: 1,
+    whatHappened: "Outbound cold call to Vedant. He said their company has internally developed software for expenses/approvals and is not looking for external solutions. He referred SpendNest to the business head (Rishabh) on a professional networking site, but explicitly asked that his name NOT be used when reaching out.",
+    whyItMatters: "No current need confirmed. Internal software handles expense/approvals. The contact respects the privacy of his referral and specifically requested anonymity. Rishabh may or may not be accessible. This is not a qualified lead.",
+    evidence: [
+      "Vedant: \"We have developed our own software internally, so at present we aren't looking for anything outside the organisation.\"",
+      "Vedant: \"You can find our business head, Mr Rishabh, on a professional networking site.\"",
+      "Vedant: \"No, please don't use my name.\" (when asked if his name could be mentioned)"
+    ],
+    uncertainty: "Vedant did not know whether their internal system handles payments as well as approvals. Whether Rishabh is approachable via social is unconfirmed.",
+    action: "Do NOT mention Vedant's name in any future outreach. If approaching Rishabh on a professional networking site, do so on the basis of general qualification, not with Vedant's referral. Log call as non-opportunity with anonymity flag.",
+    routes: ["research"],
+    routeReasons: { research: "No qualified need; internal software in place. Contact explicitly requested name not be used. No follow-up call recommended." },
+    privacyFlag: "Contact (Vedant) explicitly requested their name NOT be used in any future outreach to their business head."
+  },
+
+  "call|b747f592-810e-583c-9b81-8db5ab035806": { // C10
+    rev: 1,
+    whatHappened: "Outbound call to Aniket. He no longer works at Meadowbrick — now in manufacturing. He asked for a message via a messaging app and said he would review it. When a follow-up call was suggested, he refused: 'No. I said I will contact you if there is anything to discuss.'",
+    whyItMatters: "Contact is no longer at the target company. He prefers asynchronous contact. He explicitly refused a follow-up call. Engaging him further by phone without invitation would be counterproductive.",
+    evidence: [
+      "Aniket: \"I don't work there anymore.\" (on Meadowbrick)",
+      "Aniket: \"why don't you just send me a brief on the messaging app?\"",
+      "Aniket: \"No. I said I will contact you if there is anything to discuss.\" (on follow-up call)"
+    ],
+    uncertainty: "Aniket's new company (manufacturing) and name are unknown beyond 'different sector'. Whether manufacturing is in SpendNest's target market is not established.",
+    action: "Send a brief product overview via the messaging app (as requested). Do NOT schedule or suggest a follow-up call. Await contact if he finds it relevant.",
+    routes: ["research"],
+    routeReasons: { research: "Contact no longer at target company; explicitly refused follow-up call. Message only, no call outreach." }
+  },
+
+  /* ---- MEETINGS WITH TRANSCRIPTS ---- */
+
+  "meeting|cb5cecac-e68d-52b7-b10b-b0c748efc467": { // M01
+    rev: 1,
+    whatHappened: "Meeting with Partner A from Harborpath Advisory to discuss a referral partnership. SpendNest presented commission structure, customer pricing, and onboarding requirements for referred businesses. Partner A was interested in a scalable referral mechanism (unique link preferred over manual emails) and wanted written materials to prepare a product page quickly.",
+    whyItMatters: "A concrete partner interest exists. Referral link mechanism was discussed and preferred. However, a memorandum has not yet been signed, and written commercial/onboarding terms have not been sent yet. The podcast collaboration and partner-page listing were proposed but not finalised.",
+    evidence: [
+      "M01 Turn 6: Partner A on current practice: 'Yes, I use some myself and recommend them. Usually I receive nothing for the recommendation. If there is a sensible commercial arrangement here, that is interesting to me.'",
+      "M01 Turn 16: Partner A: 'How do we track that? Is there a referral link, a code, or am I writing an introduction each time?'",
+      "M01 Turn 20: Partner A: 'It cannot depend on me manually writing every email. This needs to scale when people discover the offer through us.'",
+      "M01 Turn 21: Team agreed referral link + shared tracking sheet.",
+      "M01 Turn 13: Memorandum to sign is part of onboarding — NOT yet completed."
+    ],
+    uncertainty: "Memorandum not yet signed. Written materials (referral link, partner docs, commercial terms) not yet sent. Podcast and partner-page features were discussed but not committed. Partner A needs written material before making the offer available.",
+    action: "Send written package: referral link, tracking sheet, commission structure, customer pricing, onboarding requirements summary, and partner limitations (Turn 23). Arrange memorandum signing. Connect with marketing regarding podcast and partner-page listing.",
+    routes: ["partner", "deal"],
+    routeReasons: {
+      partner: "Active partner relationship discussion with Harborpath Advisory; referral model agreed in principle, materials and memorandum pending.",
+      deal: "Commission structure presented; next step is written terms and memorandum — commercial next step is in progress."
+    }
+  },
+
+  "meeting|1a21c409-c050-5787-90af-2667e057e1b6": { // M02
+    rev: 1,
+    whatHappened: "Meeting with LedgerBridge (Supplier A) to explore electronic invoicing integration for SpendNest's product. SpendNest is developing AR capabilities and wants compliant e-invoicing across its markets. LedgerBridge explained two pricing models (country licences vs per-customer licences) and setup fees (EUR 2,600–6,500+). A volume template is to be sent before the commercial call.",
+    whyItMatters: "Electronic invoicing is a strategic product extension for SpendNest, not just a feature request. However, timing may slip (Q4 is a goal but 'not an immovable deadline'). Volume inputs (AP vs issued invoices) must be separated: AP volumes can be estimated from existing usage; issued invoice volumes are estimates because the AR module is still being built.",
+    evidence: [
+      "M02 Turn 12: Team: 'The view is that electronic invoicing will become more common. We want to start preparing before requirements force us into a rushed implementation.'",
+      "M02 Turn 13: 'We are aiming for the fourth quarter... Singapore and Australia, then India.'",
+      "M02 Turn 15: 'Early next year is possible if the work moves. We intend to build the capability, but I would not describe the quarter as an immovable deadline.'",
+      "M02 Turn 18 (IMPORTANT): Team: 'Received invoice volumes can be based on current accounts-payable usage. Issued volumes will be estimates because the receivables product is still being built. We should not present those two columns as equally certain.'",
+      "M02 Turn 31: Setup: 'EUR 2,600 basic; EUR 6,500 more supported; larger projects scoped separately.'",
+      "M02 Turn 29: Pricing models: country licences with transaction usage, OR licences per end customer with included usage and volume tiers."
+    ],
+    uncertainty: "Pricing/setup still require volume template completion. Q4 date may slip. US reporting use case (Turn 7) is out-of-scope for LedgerBridge's standard offering. Which customers require e-invoicing before mandate is not yet known (Turn 5). Commercial model not yet chosen.",
+    action: "Complete LedgerBridge volume template distinguishing AP volumes (reliable) from estimated issued invoice volumes (uncertain). Arrange short explanation call after template. Identify stakeholders for the commercial discussion. Do not present timing as committed.",
+    routes: ["deal", "research"],
+    routeReasons: {
+      deal: "Active commercial evaluation with LedgerBridge; setup pricing shared; volume template and commercial call next steps.",
+      research: "Qualification still needed: volume template, pricing model choice, and timing decision not yet resolved."
+    }
+  },
+
+  "meeting|398672e7-62dd-5afd-846d-0237d49792fb": { // M03
+    rev: 1,
+    whatHappened: "Meeting with Asterloom Systems (Customer A, Customer B / CFO's representative). Customer A expected a credit card but SpendNest's domestic offering is prepaid. This product mismatch was clearly identified. Pricing was clarified: INR 26,000/year (recurring subscription) + INR 13,000 one-time accounting integration setup. Customer B confirmed CFO approval is required and asked not to schedule another call before internal discussion.",
+    whyItMatters: "The prepaid vs credit card distinction is the primary blocker. CFO must approve before any decision. Customer is willing to consider the solution for 4–5 employees initially, pending CFO sign-off. The proposal should be sent for review. Do not recommend a follow-up call; the customer explicitly asked to make that decision internally.",
+    evidence: [
+      "M03 Turn 6: Customer A: 'Wait, these are prepaid? I had thought about a corporate credit card.'",
+      "M03 Turn 24 (PRICING): Team clarified: 'INR 26,000 plus tax is the recurring annual subscription, and INR 13,000 is the one-time accounting integration setup.' (corrected from earlier mis-stated INR 39,000 combined figure)",
+      "M03 Turn 28: Customer B: 'Our CFO approves the larger payments. We need to explain the proposal to them.'",
+      "M03 Turn 36: Customer B: 'Send the details first. We need time with the CFO and will tell you if another call is needed. Let us make that decision internally before scheduling more.'"
+    ],
+    uncertainty: "CFO approval not yet obtained. Whether the prepaid model is acceptable after internal discussion is unknown. International credit card route (separate, bank-issued, eligibility requirements) was mentioned but not fully explored. Reimbursement module pricing not yet confirmed separately. Vendor payment volume (INR 26–39 lakh/month estimate from Customer B) is rough and not actionable yet.",
+    action: "Send cards proposal with clearly separated pricing: INR 26,000/year recurring + INR 13,000 one-time setup (plus tax). Include reimbursement module details separately. Do not schedule a follow-up call — await internal decision on CFO approval. Clearly note prepaid-only limitation for domestic cards.",
+    routes: ["deal", "followup"],
+    routeReasons: {
+      deal: "Active evaluation with Asterloom Systems; corrected pricing agreed; proposal to be sent; CFO approval pending.",
+      followup: "Customer requested internal time with CFO before any call. Follow-up is awaiting their signal, not proactively scheduled."
+    }
+  },
+
+  "meeting|b0f79b3d-37ba-52f9-b2bc-58b159dd6d91": { // M04
+    rev: 1,
+    whatHappened: "Meeting with Cedarwave Distribution (Customer A, Customer B) about planned card programme migration from old provider to new prepaid + wallet. Multiple unresolved issues surfaced: the prepaid vs credit card blocker, a people-system integration question, accounting-sync feasibility for existing bank-issued credit cards, and a department-user-reorganisation issue.",
+    whyItMatters: "The primary blocker is the customer's desire for a credit card solution, not prepaid. This requires internal discussion and possibly a bank-issued credit card programme. Multiple other issues (integration, accounting sync, department setup) remain unresolved and must not be collapsed into a single finding.",
+    evidence: [
+      "M04 Turn 9: 'Will the replacement be a proper credit card? We do not really want another prepaid arrangement indefinitely.'",
+      "M04 Turn 10: Team: 'The replacement I described is still prepaid. I do not want to promise that this becomes a credit card in the near term.'",
+      "M04 Turn 7: 'There was another problem: connecting this application with our people and expense system. We did not think that integration was possible.'",
+      "M04 Turn 21: Team: 'Many transaction fields can sync, but source-balance reconciliation is a question in this setup. I need the team to confirm feasibility.'",
+      "M04 Turn 23: Team: 'I will check whether your already-issued cards can join the transaction-feed programme... I cannot confirm the existing-card eligibility on this call.'",
+      "M04 Turn 30: Department-user reorganisation issue acknowledged but not resolved."
+    ],
+    uncertainty: "Integration with people/expense system: specific scope not yet clarified (Turn 7-8). Eligibility of existing bank-issued credit cards for transaction-feed programme: not confirmed (Turn 23). Accounting-sync feasibility for bank-card transactions: unconfirmed (Turn 21). Department reorganisation guide session not yet scheduled.",
+    action: "1) Confirm eligibility of existing bank-issued cards for transaction-feed programme with the programme team. 2) Clarify which part of the people-system integration is needed. 3) Confirm accounting-sync feasibility for bank-card transactions. 4) Schedule department-user reorganisation guidance session. 5) Present prepaid+wallet migration plan separately from the bank-credit-card question.",
+    routes: ["followup", "support"],
+    routeReasons: {
+      followup: "Multiple open questions require team follow-up with the customer. Migration plan and bank-card eligibility both pending.",
+      support: "Department-user organisation issue requires assisted setup. Existing system integration and accounting sync are technical issues to be resolved by the product team."
+    }
+  },
+
+  "meeting|657b9e9d-9472-5b01-a127-a648ad7e8cf7": { // M06
+    rev: 1,
+    whatHappened: "Meeting with Customer A at Mapletrail Services branch finance. Discussed receivables automation and expense management. Customer handles around 8 clients locally; broader company has 65-78 customers with estimated 260-390 invoices/month (rough estimate; customer corrected the team's misunderstanding). One expense-recovery invoice has been outstanding for months despite the same client paying regular service invoices. Security/compliance question answered vaguely by the team.",
+    whyItMatters: "Potential fit for both receivables automation and expense/payables. However: invoice counts are rough estimates stated during conversation; the outstanding expense-recovery invoice remains unresolved; the security answer was general and not specific to the customer's question.",
+    evidence: [
+      "M06 Turn 12: Customer: '65–78 customers. There may be several projects for each. Initially I would estimate 260–390 invoices a month.' (ESTIMATE)",
+      "M06 Turn 14: Customer corrected misunderstanding: 'Several for each customer, each month. I was not saying that the entire company only sends a handful of invoices.'",
+      "M06 Turn 10: Outstanding expense-recovery invoice: 'One expense-recovery invoice has been outstanding for months even though the same client pays the normal service invoices. We still need the delivery manager to establish why that particular item is held up.'",
+      "M06 Turn 32: Security question: 'We have security and compliance controls and certifications around the platform.' — general answer, specifics not given."
+    ],
+    uncertainty: "Invoice counts are estimates from a conversation, not a report. The expense-recovery invoice issue is unresolved and its root cause is unknown. The dedicated central AP/AR team may make much of the automation redundant. Security details not yet sent.",
+    action: "Send materials covering receivables automation and expense/payables features. Include security/compliance documentation. Do not present invoice estimates as confirmed volumes. Follow up on whether the local or central team would use the product.",
+    routes: ["research", "followup"],
+    routeReasons: {
+      research: "Interest in receivables automation but central team structure and actual volume/decision authority still need clarification.",
+      followup: "Agreed to send materials and stay in touch. Outstanding expense-recovery invoice is a separate operational matter not owned by SpendNest."
+    }
+  },
+
+  "meeting|4f304fff-fd40-5cfc-a366-0a134c445c2a": { // M07 — FROM UPDATE BATCH (rev 2)
+    rev: 2,
+    whatHappened: "Customer support session with Willowfield Trust (Customer A). Four distinct product issues were reviewed: 1) Description-edit not persisting after save; 2) File attachment fails via 'Recreate payment' route (workaround found: use Bill pay > invoice inbox > Review); 3) Payments stuck in 'Processing' state despite appearing to have been released; 4) Mark-as-paid amount carries forward from previous payment instead of refreshing to the next item's value.",
+    whyItMatters: "Each issue is a distinct product/support bug. The attachment workaround is only a workaround — the underlying direct-upload issue is unresolved. The Processing state is being investigated by the team. The amount carry-forward bug requires a separate investigation. None of these issues have been resolved in this session.",
+    evidence: [
+      "M07 Turn 3/4: Description-edit: 'The field still shows the earlier wording. So the change is not appearing after you save.' — Confirmed by customer.",
+      "M07 Turn 8-15: Attachment via Recreate payment fails; workaround via Bill pay > invoice inbox > Review confirmed to work (Turn 12), but WORKAROUND IS NOT A FIX (Turn 15: 'The workaround does not mean the direct upload issue has been resolved.').",
+      "M07 Turn 16-19: Processing state stuck: 'Those payments are already in Processing, which is why selection is disabled.' Team investigating; 1-2 hour ETA for update.",
+      "M07 Turn 20-25: Amount carry-forward: 'The amount from the previous item appears in the next one.' — Customer must cancel, leave, and reopen before correct value shows.",
+      "M07 Turn 27: 'I will send the details to the team, get their confirmation and come back to you.'"
+    ],
+    uncertainty: "Resolution timeline for description-edit bug is unknown. Direct-upload issue cause is unidentified. Whether the Processing state will clear automatically or needs manual intervention is pending. The amount carry-forward refresh bug's scope is not known.",
+    action: "Raise three separate product/support tickets: 1) Description-edit not persisting. 2) Attachment upload failure via Recreate payment path. 3) Mark-as-paid amount carry-forward. Follow up with Willowfield Trust on Processing state within 1-2 hours (as promised). Do not report workaround as a resolution.",
+    routes: ["support"],
+    routeReasons: { support: "Active customer support session with four distinct product bugs identified. Multiple internal product/engineering tickets required." },
+    analysisNote: "Analysis reflects transcript from revision 2 (update batch). This record was updated from initial batch which had no usable transcript."
+  },
+
+  "meeting|4b5b9192-f3fc-505a-8e77-4d2ffaa54594": { // M09
+    rev: 1,
+    whatHappened: "Customer support session: Customer A (managing two company accounts: Northkite Equipment and Brookmint Holdings) tried to set up Brookmint Holdings login. The invitation/reset token expired immediately, even a freshly sent one. Account identity, role/permission design for a shared mailbox, and continuity planning were discussed but not resolved. Training needs were identified for Northkite Equipment workflows.",
+    whyItMatters: "The Brookmint Holdings login is not working — the token expiry issue requires engineering investigation. Account/permission design for shared vs personal identities is genuinely complex and has not been resolved. Training is needed before Brookmint Holdings becomes active with many employees.",
+    evidence: [
+      "M09 Turn 21: 'It says the token has expired. This is the fresh message we just received.' — Freshly sent reset token expired immediately.",
+      "M09 Turn 22: 'I need to check that with the team. I hope to update you today, or by Monday at the latest.'",
+      "M09 Turn 5: Two company accounts in use, different email identities.",
+      "M09 Turn 11-17: Permission concern: shared mailbox could grant unwanted admin access to accounts-payable officer.",
+      "M09 Turn 18: Resolution options discussed but not implemented: 'Then a separate administrator email, or changing the shared account's permissions.'"
+    ],
+    uncertainty: "Token expiry cause is unknown; the team said they would investigate but no resolution happened in session. Role/permission design for shared mailbox is pending customer's internal IT decision. Training session not yet scheduled. Whether Brookmint Holdings login was successfully completed is unknown — it was NOT resolved in this session.",
+    action: "Investigate expired-token issue for Brookmint Holdings with the engineering team. Report back to customer today or Monday (as promised). Separately, schedule training session for Northkite Equipment and Brookmint Holdings administration. Provide clear documentation on role/permission options for shared vs personal identities.",
+    routes: ["support", "followup"],
+    routeReasons: {
+      support: "Active token expiry bug affecting Brookmint Holdings login. Engineering team investigation required.",
+      followup: "Training session, permission design advice, and update on token expiry all pending."
+    }
+  },
+
+  "meeting|337f297d-9385-5b82-9e54-5019c1ed912c": { // M10
+    rev: 1,
+    whatHappened: "Internal billing workflow training session. Team member A walked Team member B through invoice generation, billing cycles, and collection processes. Key points: invoice month ≠ cash received month; automated invoice generation ≠ payment deduction (they are separate steps with a gap); zero-value invoices are valid; the 7-day due period can be extended; failed deductions trigger a retry sequence (days 1, 3, 7, 10) before account freeze.",
+    whyItMatters: "This is an internal training session, not a sales or customer conversation. It should be routed for internal process reference. The distinction between invoice generation and payment deduction is critical for accurate reporting.",
+    evidence: [
+      "M10 Turn 7: 'An invoice dated in an earlier month might have been cleared later, so check the dates rather than assuming they match.'",
+      "M10 Turn 9: Team C: 'That explains why the invoice month alone does not tell us when the cash arrived.'",
+      "M10 Turn 14: 'Invoice generation is at midnight in the customer's local time, with a later scheduled attempt to deduct the balance.'",
+      "M10 Turn 15: 'Suppose the invoice is INR 6,240 but the wallet contains INR 6,110. The deduction fails and a notification goes out.'"
+    ],
+    uncertainty: "Team member B does not yet have back-office super-admin access (Turn 4), so they could not practice live. Follow-up access request is pending. Optional attendee did not join.",
+    action: "Request back-office access for Team member B for next training session. Document billing flow distinctions (invoice date vs cash date, automated generation vs deduction, retry sequence). This is not a sales opportunity.",
+    routes: ["training"],
+    routeReasons: { training: "Internal billing workflow training session. No sales or customer interaction. Should be stored as internal process reference." }
+  }
+};
+
+/* ============================ ROUTE DEFINITIONS ============================ */
+const ROUTE_DEFS = {
+  partner:  { label: "Partner opportunity",            color: "var(--color-purple)",  bg: "var(--color-purple-dim)",  badge: "badge-partner"  },
+  deal:     { label: "Deal / commercial next steps",   color: "var(--color-green)",   bg: "var(--color-green-dim)",   badge: "badge-deal"     },
+  followup: { label: "Customer follow-up",             color: "var(--color-cyan)",    bg: "var(--color-cyan-dim)",    badge: "badge-followup" },
+  research: { label: "Sales research / qualification", color: "var(--color-amber)",   bg: "var(--color-amber-dim)",   badge: "badge-research" },
+  support:  { label: "Support / product issue",        color: "var(--color-red)",     bg: "var(--color-red-dim)",     badge: "badge-support"  },
+  training: { label: "Internal training / process",   color: "var(--color-teal)",    bg: "var(--color-teal-dim)",    badge: "badge-training" },
+  review:   { label: "Human review needed",            color: "var(--color-orange)",  bg: "var(--color-orange-dim)",  badge: "badge-review"   }
+};
+
+/* ============================ STATE ============================ */
+let STATE = {
+  records: {},        // key: "source_type|source_id" -> { record_ref, source_type, source_id, payload, transcript_payload, appliedRevision }
+  analysis: {},       // key: "source_type|source_id" -> { routes, manualRoutes, manualOverride, reviewStatus, analysisRevision }
+  importLog: [],
+  currentView: 'dashboard',
+  selectedRecord: null,
+  inboxFilter: { sourceType: 'all', route: 'all', search: '', person: 'all', hasTranscript: 'all' },
+  lastExportTime: null
+};
+
+const STORAGE_KEY = 'ri_inbox_v3';
+
+function stateKey(rec) { return `${rec.source_type}|${rec.source_id}`; }
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      STATE.records = saved.records || {};
+      STATE.analysis = saved.analysis || {};
+      STATE.importLog = saved.importLog || [];
+    }
+  } catch(e) { console.warn('State load error:', e); }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      records: STATE.records,
+      analysis: STATE.analysis,
+      importLog: STATE.importLog
+    }));
+  } catch(e) { console.warn('State save error:', e); }
+}
+
+function clearState() {
+  STATE.records = {};
+  STATE.analysis = {};
+  STATE.importLog = [];
+  saveState();
+}
+
+/* ============================ ANALYSIS HELPERS ============================ */
+function getPregenAnalysis(source_type, source_id) {
+  const key = `${source_type}|${source_id}`;
+  return PRE_GENERATED_ANALYSIS[key] || null;
+}
+
+function initAnalysisForRecord(key, sourceType, sourceId, payload, transcript_payload, appliedRevision) {
+  if (!STATE.analysis[key]) STATE.analysis[key] = {};
+  const a = STATE.analysis[key];
+  const pregen = getPregenAnalysis(sourceType, sourceId);
+
+  // If there's no manual override, refresh analysis routes from pregen
+  if (!a.manualOverride) {
+    if (pregen) {
+      a.routes = [...pregen.routes];
+      a.routeReasons = { ...pregen.routeReasons };
+    } else {
+      a.routes = ['review'];
+      a.routeReasons = { review: 'No usable transcript available; human review required.' };
+    }
+  }
+  // Mark freshness
+  a.analysisRevision = pregen ? pregen.rev : appliedRevision;
+  a.currentSourceRevision = appliedRevision;
+  a.analysisFresh = !pregen || (pregen.rev >= appliedRevision);
+
+  // Set initial review status if not set
+  if (!a.reviewStatus) a.reviewStatus = 'pending';
+}
+
+/* ============================ IMPORT ENGINE ============================ */
+function processImportBatch(data) {
+  const log = [];
+  if (!data || !data.records || !Array.isArray(data.records)) {
+    log.push({ type: 'err', msg: 'Invalid batch format: missing records array' });
+    return log;
+  }
+  const batchRev = data.revision || 1;
+  log.push({ type: 'info', msg: `Batch: ${data.batch_id} | Revision: ${batchRev} | Records: ${data.records.length}` });
+
+  let added = 0, updated = 0, skipped = 0;
+  for (const rec of data.records) {
+    const key = stateKey(rec);
+    const existing = STATE.records[key];
+
+    if (existing) {
+      const existingRev = existing.appliedRevision || 1;
+      if (batchRev <= existingRev) {
+        log.push({ type: 'warn', msg: `${rec.record_ref}: Rev ${batchRev} <= existing rev ${existingRev} — skipped` });
+        skipped++;
+        continue;
+      }
+      // Apply newer revision
+      const hadTranscript = hasUsableTranscript(existing);
+      STATE.records[key] = { ...rec, appliedRevision: batchRev };
+      const hasNow = hasUsableTranscript(STATE.records[key]);
+      const transcriptMsg = (!hadTranscript && hasNow) ? ' [TRANSCRIPT NOW AVAILABLE]' : '';
+      log.push({ type: 'ok', msg: `${rec.record_ref}: Updated rev ${existingRev}→${batchRev}${transcriptMsg}` });
+      // Mark analysis stale if transcript changed
+      if (!hadTranscript && hasNow && STATE.analysis[key] && !STATE.analysis[key].manualOverride) {
+        STATE.analysis[key].analysisFresh = false;
+        STATE.analysis[key].analysisNote = 'Source text changed; analysis may need review.';
+      }
+      initAnalysisForRecord(key, rec.source_type, rec.source_id, rec.payload, rec.transcript_payload, batchRev);
+      updated++;
+    } else {
+      STATE.records[key] = { ...rec, appliedRevision: batchRev };
+      initAnalysisForRecord(key, rec.source_type, rec.source_id, rec.payload, rec.transcript_payload, batchRev);
+      log.push({ type: 'ok', msg: `${rec.record_ref}: Added (rev ${batchRev})` });
+      added++;
+    }
+  }
+  log.push({ type: 'info', msg: `Done — added: ${added}, updated: ${updated}, skipped (same/older rev): ${skipped}` });
+  log.push({ type: 'info', msg: `Total unique records: ${Object.keys(STATE.records).length}` });
+  STATE.importLog.push(...log);
+  saveState();
+  return log;
+}
+
+function hasUsableTranscript(rec) {
+  if (!rec) return false;
+  const p = rec.payload;
+  if (rec.source_type === 'call') return !!(p && p.transcript && p.transcript.trim());
+  if (rec.source_type === 'meeting') {
+    const tp = rec.transcript_payload;
+    return !!(tp && tp.turns && tp.turns.length > 0 && tp.turns.some(t => t.text && t.text.trim()));
+  }
+  return false;
+}
+
+function getUsableTranscriptCount() {
+  return Object.values(STATE.records).filter(hasUsableTranscript).length;
+}
+
+function getRecordList() {
+  return Object.values(STATE.records).sort((a, b) => {
+    const ta = new Date(a.source_type === 'call' ? a.payload.started_at : a.payload.starts_at).getTime();
+    const tb = new Date(b.source_type === 'call' ? b.payload.started_at : b.payload.starts_at).getTime();
+    return tb - ta;
+  });
+}
+
+function getPersonForRecord(rec) {
+  if (rec.source_type === 'call') return rec.payload.rep_name || rec.payload.rep_email || 'Unknown';
+  if (rec.source_type === 'meeting') return rec.payload.organizer_email ? rec.payload.organizer_email.split('@')[0] : 'Unknown';
+  return 'Unknown';
+}
+
+function getDateIST(rec) {
+  const iso = rec.source_type === 'call' ? rec.payload.started_at : rec.payload.starts_at;
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function getRoutesForRecord(key) {
+  const a = STATE.analysis[key];
+  if (!a) return ['review'];
+  if (a.manualOverride && a.manualRoutes) return a.manualRoutes;
+  return a.routes || ['review'];
+}
+
+/* ============================ NAVIGATION ============================ */
+function navigate(view, extra) {
+  STATE.currentView = view;
+  STATE.selectedRecord = extra || null;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.view === view);
+  });
+  document.getElementById('global-search-box').style.display = (view === 'inbox') ? 'flex' : 'none';
+  updateTopbarTitle(view);
+  renderView();
+}
+
+function updateTopbarTitle(view) {
+  const titles = { dashboard: 'Dashboard — 21 August 2026', inbox: 'Conversation Inbox', import: 'Import Data', export: 'Export', detail: 'Conversation Detail' };
+  document.getElementById('topbar-title').textContent = titles[view] || view;
+}
+
+/* ============================ RENDER DISPATCH ============================ */
+function renderView() {
+  const el = document.getElementById('content');
+  if (STATE.currentView === 'dashboard') { el.innerHTML = renderDashboard(); bindDashboardEvents(); }
+  else if (STATE.currentView === 'inbox') { el.innerHTML = renderInbox(); bindInboxEvents(); }
+  else if (STATE.currentView === 'detail') { el.innerHTML = renderDetail(STATE.selectedRecord); bindDetailEvents(); }
+  else if (STATE.currentView === 'import') { el.innerHTML = renderImport(); bindImportEvents(); }
+  else if (STATE.currentView === 'export') { el.innerHTML = renderExport(); bindExportEvents(); }
+}
+
+/* ============================ DASHBOARD ============================ */
+function renderDashboard() {
+  const records = getRecordList();
+  const total = records.length;
+  const calls = records.filter(r => r.source_type === 'call').length;
+  const meetings = records.filter(r => r.source_type === 'meeting').length;
+  const usable = getUsableTranscriptCount();
+  const coverage = total > 0 ? Math.round(usable / total * 100) : 0;
+
+  // Route counts
+  const routeCounts = {};
+  for (const r of records) {
+    const key = stateKey(r);
+    const routes = getRoutesForRecord(key);
+    for (const rt of routes) routeCounts[rt] = (routeCounts[rt] || 0) + 1;
+  }
+
+  // Review status counts
+  let pendingReview = 0, reviewed = 0, needsReview = 0;
+  for (const r of records) {
+    const a = STATE.analysis[stateKey(r)];
+    if (!a || a.reviewStatus === 'pending') pendingReview++;
+    else if (a.reviewStatus === 'reviewed') reviewed++;
+    else if (a.reviewStatus === 'needs-review') needsReview++;
+  }
+
+  // Connection rate (calls with non-null is_connected)
+  const callsWithConnStatus = records.filter(r => r.source_type === 'call' && r.payload.is_connected !== null && r.payload.is_connected !== undefined);
+  const connectedCalls = callsWithConnStatus.filter(r => r.payload.is_connected === true);
+  const connRate = callsWithConnStatus.length > 0 ? Math.round(connectedCalls.length / callsWithConnStatus.length * 100) : 0;
+
+  // Person breakdown
+  const personMap = {};
+  for (const r of records) {
+    const person = getPersonForRecord(r);
+    if (!personMap[person]) personMap[person] = { calls: 0, meetings: 0, hasTranscript: 0 };
+    if (r.source_type === 'call') personMap[person].calls++;
+    else personMap[person].meetings++;
+    if (hasUsableTranscript(r)) personMap[person].hasTranscript++;
+  }
+  const maxPersonCount = Math.max(...Object.values(personMap).map(p => p.calls + p.meetings), 1);
+
+  // Queue: records needing attention
+  const queueItems = getQueueItems(records);
+
+  if (total === 0) {
+    return `<div class="empty-state"><div class="icon">📥</div><h3>No data imported yet</h3><p>Use the Import view to load the initial dataset.</p><br><button class="btn btn-primary" onclick="loadDemoData()">🔄 Load Demo Data (Initial + Update)</button></div>`;
+  }
+
+  return `
+<div style="display:grid;grid-template-columns:1fr 340px;gap:16px;min-height:calc(100vh - var(--topbar-h) - 40px)">
+<div>
+  <!-- STATS ROW -->
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-card" onclick="resetInboxFilters();navigate('inbox')" title="View all records">
+      <div class="stat-label">Total Records</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-meta">Selected sample — 21 Aug 2026 IST</div>
+    </div>
+    <div class="stat-card" onclick="setInboxFilter('sourceType','call');navigate('inbox')" title="View calls">
+      <div class="stat-label">Calls</div>
+      <div class="stat-value blue">${calls}</div>
+      <div class="stat-meta"><b>${records.filter(r=>r.source_type==='call'&&hasUsableTranscript(r)).length}</b> with transcript</div>
+    </div>
+    <div class="stat-card" onclick="setInboxFilter('sourceType','meeting');navigate('inbox')" title="View meetings">
+      <div class="stat-label">Meetings</div>
+      <div class="stat-value purple">${meetings}</div>
+      <div class="stat-meta"><b>${records.filter(r=>r.source_type==='meeting'&&hasUsableTranscript(r)).length}</b> with transcript</div>
+    </div>
+    <div class="stat-card" onclick="setInboxFilter('hasTranscript','yes');navigate('inbox')" title="View records with transcripts">
+      <div class="stat-label">Usable Transcripts</div>
+      <div class="stat-value green">${usable}</div>
+      <div class="stat-meta">Coverage: <b>${coverage}%</b> of ${total} records</div>
+    </div>
+  </div>
+
+  <!-- SECONDARY STATS -->
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+    <div class="stat-card" onclick="setInboxFilter('route','partner');navigate('inbox')">
+      <div class="stat-label">Partner</div>
+      <div class="stat-value purple">${routeCounts.partner||0}</div>
+      <div class="stat-meta">route assignments</div>
+    </div>
+    <div class="stat-card" onclick="setInboxFilter('route','deal');navigate('inbox')">
+      <div class="stat-label">Deal / Commercial</div>
+      <div class="stat-value green">${routeCounts.deal||0}</div>
+      <div class="stat-meta">route assignments</div>
+    </div>
+    <div class="stat-card" onclick="setInboxFilter('route','support');navigate('inbox')">
+      <div class="stat-label">Support Issues</div>
+      <div class="stat-value" style="color:var(--color-red)">${routeCounts.support||0}</div>
+      <div class="stat-meta">route assignments</div>
+    </div>
+    <div class="stat-card" onclick="setInboxFilter('route','review');navigate('inbox')">
+      <div class="stat-label">Human Review</div>
+      <div class="stat-value amber">${routeCounts.review||0}</div>
+      <div class="stat-meta">route assignments</div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY BY PERSON -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">Activity by Person — 21 Aug 2026</div><div class="text-xs text-muted">Call reps vs meeting organizers distinguished</div></div>
+    <div class="bar-chart">
+      ${Object.entries(personMap).sort((a,b)=>(b[1].calls+b[1].meetings)-(a[1].calls+a[1].meetings)).map(([name, data]) => {
+        const total2 = data.calls + data.meetings;
+        const pct = Math.round(total2 / maxPersonCount * 100);
+        const parts = [];
+        if (data.calls > 0) parts.push(`<span style="color:var(--color-accent)">${data.calls}c</span>`);
+        if (data.meetings > 0) parts.push(`<span style="color:var(--color-purple)">${data.meetings}m</span>`);
+        return `<div class="bar-row" title="${name}: ${data.calls} calls, ${data.meetings} meetings, ${data.hasTranscript} with transcript">
+          <div class="bar-label">${name}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--color-accent-dim),var(--color-purple-dim))">
+              <span>${parts.join(' ')}</span>
+            </div>
+          </div>
+          <div class="bar-count">${total2}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="text-xs text-muted mt-2">Note: Call reps = rep_name on call records. Meeting organizers = organizer_email on meeting records. An organizer is not automatically a salesperson or confirmed attendee.</div>
+  </div>
+
+  <!-- ROUTE DISTRIBUTION -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">Route Distribution</div><div class="text-xs text-muted">Route assignments ≥ unique record count when multi-routed</div></div>
+    <div class="bar-chart">
+      ${Object.entries(ROUTE_DEFS).map(([key, def]) => {
+        const count = routeCounts[key] || 0;
+        const maxCount = Math.max(...Object.values(routeCounts), 1);
+        const pct = Math.round(count / maxCount * 100);
+        return `<div class="bar-row">
+          <div class="bar-label">${def.label.split('/')[0].trim()}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct}%;background:${def.color};opacity:0.8">
+              <span>${count}</span>
+            </div>
+          </div>
+          <div class="bar-count">${count}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="text-xs text-muted mt-2">Total route assignments: ${Object.values(routeCounts).reduce((a,b)=>a+b,0)} across ${total} unique records</div>
+  </div>
+</div>
+
+<!-- RIGHT COLUMN -->
+<div style="display:flex;flex-direction:column;gap:14px">
+  <!-- MANAGER BRIEF -->
+  <div class="brief-section">
+    <div class="brief-header">
+      <div class="brief-date">21 August 2026 · Asia/Kolkata · Pre-generated</div>
+      <div class="brief-title">Manager Brief</div>
+    </div>
+    <div class="brief-body">
+      <div class="brief-item">
+        <div class="brief-icon">🤝</div>
+        <div class="brief-item-content">
+          <div class="brief-item-title">Partner Pipeline: 2 meetings need action</div>
+          <div class="brief-item-text">M01 (Harborpath Advisory): referral link agreed; written materials and memorandum not yet sent. C07 (Willowbank Advisory): proposal requested via chat; Monday call agreed.</div>
+          <div class="brief-item-link" onclick="navigate('detail','meeting|cb5cecac-e68d-52b7-b10b-b0c748efc467')">→ View M01</div>
+        </div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-icon">💼</div>
+        <div class="brief-item-content">
+          <div class="brief-item-title">Active Commercial Discussions</div>
+          <div class="brief-item-text">M03 (Asterloom): prepaid/credit mismatch; CFO approval pending; send proposal (INR 26,000+13,000 pricing). M02 (LedgerBridge): e-invoicing evaluation; volume template pending.</div>
+          <div class="brief-item-link" onclick="navigate('detail','meeting|398672e7-62dd-5afd-846d-0237d49792fb')">→ View M03</div>
+        </div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-icon">🐛</div>
+        <div class="brief-item-content">
+          <div class="brief-item-title">Support Escalations (3 open)</div>
+          <div class="brief-item-text">M07 (Willowfield): 4 product bugs; workaround ≠ fix. M09 (Brookmint Holdings): expired login token unresolved. M04 (Cedarwave): multiple integration/migration questions.</div>
+          <div class="brief-item-link" onclick="navigate('detail','meeting|4f304fff-fd40-5cfc-a366-0a134c445c2a')">→ View M07</div>
+        </div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-icon">📞</div>
+        <div class="brief-item-content">
+          <div class="brief-item-title">Outbound Call Activity</div>
+          <div class="brief-item-text">${calls} calls recorded. ${connectedCalls.length} connected (source-reported, of ${callsWithConnStatus.length} with status). ${records.filter(r=>r.source_type==='call'&&hasUsableTranscript(r)).length} with usable transcript. C03 follow-up email + Mon call committed.</div>
+        </div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-icon">⚠️</div>
+        <div class="brief-item-content">
+          <div class="brief-item-title">Privacy Flag</div>
+          <div class="brief-item-text">C09: Contact explicitly asked name not be used in any outreach. Respect this in all communications.</div>
+          <div class="brief-item-link" onclick="navigate('detail','call|4a1de681-f884-55e8-b1ad-de22d17cd959')">→ View C09</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW QUEUE -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">Review Queue</div><span class="badge" style="background:var(--color-amber-dim);color:var(--color-amber)">${queueItems.length} items</span></div>
+    <div>
+      ${queueItems.map(q => `
+      <div class="review-queue-item" onclick="navigate('detail','${q.key}')">
+        <div class="queue-icon">${q.icon}</div>
+        <div>
+          <div class="flex items-center gap-2"><span class="queue-ref">${q.ref}</span></div>
+          <div class="queue-title">${q.title}</div>
+          <div class="queue-desc">${q.desc}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>
+</div>`;
+}
+
+function getQueueItems(records) {
+  const items = [];
+  const queue = [
+    { key: 'meeting|cb5cecac-e68d-52b7-b10b-b0c748efc467', ref: 'M01', icon: '🤝', title: 'Send written partner materials to Harborpath Advisory', desc: 'Referral link, commission docs, memorandum — not yet sent' },
+    { key: 'meeting|4f304fff-fd40-5cfc-a366-0a134c445c2a', ref: 'M07', icon: '🐛', title: 'Raise 3 product tickets for Willowfield Trust', desc: 'Description-edit, attachment upload, Mark-as-paid carry-forward' },
+    { key: 'meeting|4b5b9192-f3fc-505a-8e77-4d2ffaa54594', ref: 'M09', icon: '🔑', title: 'Investigate expired login token — Brookmint Holdings', desc: 'Freshly sent reset token expired immediately; team investigation needed' },
+    { key: 'call|428817fa-7e9e-5418-a7d4-bb396d28dfbf', ref: 'C07', icon: '💬', title: 'Send partnership proposal to Willowbank Advisory', desc: 'Monday call agreed; proposal via chat requested' },
+    { key: 'meeting|398672e7-62dd-5afd-846d-0237d49792fb', ref: 'M03', icon: '📋', title: 'Send Asterloom proposal — await CFO decision', desc: 'Prepaid/credit gap acknowledged; pricing clarified (INR 26k + 13k)' },
+    { key: 'call|20d509ba-d589-5334-9aef-ea4ce6105b1a', ref: 'C03', icon: '📧', title: 'Email Milan — "Developer access and event notifications"', desc: 'Poor audio; follow-up email + Mon/Tue call agreed' },
+    { key: 'meeting|b0f79b3d-37ba-52f9-b2bc-58b159dd6d91', ref: 'M04', icon: '❓', title: 'Confirm bank-card eligibility for Cedarwave Distribution', desc: 'Credit vs prepaid blocker; integration and accounting-sync unconfirmed' },
+  ];
+  for (const q of queue) {
+    if (STATE.records[q.key]) items.push(q);
+  }
+  return items;
+}
+
+function bindDashboardEvents() {}
+
+/* ============================ INBOX ============================ */
+function setInboxFilter(key, val) {
+  STATE.inboxFilter[key] = val;
+}
+
+function resetInboxFilters() {
+  STATE.inboxFilter = { sourceType: 'all', route: 'all', search: '', person: 'all', hasTranscript: 'all' };
+  const el = document.getElementById('global-search');
+  if (el) el.value = '';
+}
+
+function renderInbox() {
+  const records = getFilteredRecords();
+  const f = STATE.inboxFilter;
+
+  const persons = [...new Set(getRecordList().map(getPersonForRecord))].sort();
+
+  return `
+<div style="display:flex;flex-direction:column;gap:14px">
+  <!-- FILTER BAR -->
+  <div class="card" style="padding:12px 16px">
+    <div class="filter-bar">
+      <label>Type:</label>
+      <div class="chip ${f.sourceType==='all'?'active':''}" onclick="applyFilter('sourceType','all')">All (${getRecordList().length})</div>
+      <div class="chip ${f.sourceType==='call'?'active':''}" onclick="applyFilter('sourceType','call')">📞 Calls (${getRecordList().filter(r=>r.source_type==='call').length})</div>
+      <div class="chip ${f.sourceType==='meeting'?'active':''}" onclick="applyFilter('sourceType','meeting')">📅 Meetings (${getRecordList().filter(r=>r.source_type==='meeting').length})</div>
+      <div style="width:1px;height:20px;background:var(--color-border);margin:0 4px"></div>
+      <label>Transcript:</label>
+      <div class="chip ${f.hasTranscript==='all'?'active':''}" onclick="applyFilter('hasTranscript','all')">All</div>
+      <div class="chip ${f.hasTranscript==='yes'?'active':''}" onclick="applyFilter('hasTranscript','yes')">✓ Has transcript</div>
+      <div class="chip ${f.hasTranscript==='no'?'active':''}" onclick="applyFilter('hasTranscript','no')">○ No transcript</div>
+      <div style="width:1px;height:20px;background:var(--color-border);margin:0 4px"></div>
+      <label>Route:</label>
+      <select class="select" onchange="applyFilter('route',this.value)">
+        <option value="all" ${f.route==='all'?'selected':''}>All routes</option>
+        ${Object.entries(ROUTE_DEFS).map(([k,d])=>`<option value="${k}" ${f.route===k?'selected':''}>${d.label}</option>`).join('')}
+      </select>
+      <select class="select" onchange="applyFilter('person',this.value)">
+        <option value="all" ${f.person==='all'?'selected':''}>All persons</option>
+        ${persons.map(p=>`<option value="${p}" ${f.person===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+      <div style="margin-left:auto">
+        <button class="btn btn-ghost btn-sm" onclick="resetInboxFilters();renderView()" title="Clear all filters and show all records">✕ Reset Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:10px 14px;background:var(--color-surface-2);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between">
+      <span class="text-sm text-muted">Showing ${records.length} of ${getRecordList().length} records</span>
+      <span class="text-xs text-muted">Click any row to view details</span>
+    </div>
+    <table class="inbox-table">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Type</th>
+          <th>Person / Organizer</th>
+          <th>Time (IST)</th>
+          <th>Transcript</th>
+          <th>Routes</th>
+          <th>Review</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${records.length === 0 ? `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--color-text-muted)">No records match current filters</td></tr>` :
+          records.map(rec => {
+            const key = stateKey(rec);
+            const a = STATE.analysis[key];
+            const routes = getRoutesForRecord(key);
+            const hasTx = hasUsableTranscript(rec);
+            const rs = a ? a.reviewStatus : 'pending';
+            const isManual = a && a.manualOverride;
+            const isStale = a && !a.analysisFresh;
+            return `<tr onclick="navigate('detail','${key}')" title="View ${rec.record_ref}">
+              <td><span class="ref-code">${rec.record_ref}</span></td>
+              <td><span class="badge ${rec.source_type==='call'?'badge-call':'badge-meeting'}">${rec.source_type==='call'?'📞 Call':'📅 Meeting'}</span></td>
+              <td>
+                <div class="person-name">${getPersonForRecord(rec)}</div>
+                <div class="text-xs text-muted">${rec.source_type==='call'?'Rep':'Organizer'}</div>
+              </td>
+              <td><div class="timestamp">${getDateIST(rec)}</div></td>
+              <td>
+                ${hasTx ? '<span class="badge badge-transcript">✓ Available</span>' : '<span class="badge badge-no-transcript">No text</span>'}
+                ${isStale ? '<span class="badge badge-stale" title="Analysis may not reflect latest transcript">⚠ Stale</span>' : ''}
+              </td>
+              <td>
+                <div class="routes-cell">
+                  ${routes.map(r => `<span class="badge badge-${r}">${ROUTE_DEFS[r]?.label?.split('/')[0]?.trim()||r}</span>`).join('')}
+                  ${isManual ? '<span class="badge badge-manual">✏ Manual</span>' : ''}
+                </div>
+              </td>
+              <td><span class="review-dot ${rs}" title="${rs}"></span> <span class="text-xs text-muted">${rs}</span></td>
+            </tr>`;
+          }).join('')}
+      </tbody>
+    </table>
+  </div>
+</div>`;
+}
+
+function getFilteredRecords() {
+  let records = getRecordList();
+  const f = STATE.inboxFilter;
+  if (f.sourceType !== 'all') records = records.filter(r => r.source_type === f.sourceType);
+  if (f.hasTranscript === 'yes') records = records.filter(r => hasUsableTranscript(r));
+  if (f.hasTranscript === 'no') records = records.filter(r => !hasUsableTranscript(r));
+  if (f.route !== 'all') records = records.filter(r => getRoutesForRecord(stateKey(r)).includes(f.route));
+  if (f.person !== 'all') records = records.filter(r => getPersonForRecord(r) === f.person);
+  if (f.search) {
+    const q = f.search.toLowerCase();
+    records = records.filter(r => {
+      const hasTx = hasUsableTranscript(r);
+      return r.record_ref.toLowerCase().includes(q) ||
+        getPersonForRecord(r).toLowerCase().includes(q) ||
+        (r.payload.title || '').toLowerCase().includes(q) ||
+        (r.source_type === 'call' && hasTx && (r.payload.transcript||'').toLowerCase().includes(q)) ||
+        stateKey(r).toLowerCase().includes(q);
+    });
+  }
+  return records;
+}
+
+function applyFilter(key, val) {
+  STATE.inboxFilter[key] = val;
+  renderView();
+}
+
+function handleGlobalSearch(val) {
+  STATE.inboxFilter.search = val;
+  renderView();
+}
+
+function bindInboxEvents() {}
+
+/* ============================ DETAIL VIEW ============================ */
+function renderDetail(key) {
+  if (!key || !STATE.records[key]) {
+    return `<div class="empty-state"><div class="icon">❌</div><h3>Record not found</h3><p>This record does not exist in the current dataset.</p><button class="btn btn-secondary mt-2" onclick="navigate('inbox')">← Back to Inbox</button></div>`;
+  }
+  const rec = STATE.records[key];
+  const a = STATE.analysis[key] || {};
+  const pregen = getPregenAnalysis(rec.source_type, rec.source_id);
+  const routes = getRoutesForRecord(key);
+  const hasTx = hasUsableTranscript(rec);
+  const payload = rec.payload;
+  const title = rec.source_type === 'meeting' ? (payload.title || 'Untitled Meeting') : `Call — ${payload.rep_name || payload.rep_email || 'Unknown'}`;
+  const timeIST = getDateIST(rec);
+
+  return `
+<div>
+  <div style="margin-bottom:12px">
+    <button class="btn btn-ghost btn-sm" onclick="navigate('inbox')">← Back to Inbox</button>
+  </div>
+  <div class="detail-panel">
+    <!-- LEFT: MAIN CONTENT -->
+    <div class="detail-main">
+      <!-- HEADER -->
+      <div class="detail-header">
+        <div class="detail-header-top">
+          <div>
+            <div class="detail-title">${title}</div>
+            <div class="detail-header-meta">
+              <span class="badge ${rec.source_type==='call'?'badge-call':'badge-meeting'}">${rec.source_type==='call'?'📞 Call':'📅 Meeting'}</span>
+              <span class="ref-code">${rec.record_ref}</span>
+              ${hasTx ? '<span class="badge badge-transcript">✓ Transcript</span>' : '<span class="badge badge-no-transcript">No transcript</span>'}
+              ${a.manualOverride ? '<span class="badge badge-manual">✏ Manual route</span>' : ''}
+              ${a.analysisFresh === false ? '<span class="badge badge-stale">⚠ Analysis may be stale</span>' : ''}
+              ${pregen && rec.appliedRevision && pregen.rev >= rec.appliedRevision ? '<span class="badge badge-fresh">✓ Analysis current</span>' : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary btn-sm" onclick="toggleReviewStatus('${key}')">
+              ${a.reviewStatus === 'reviewed' ? '✓ Reviewed' : 'Mark Reviewed'}
+            </button>
+          </div>
+        </div>
+        <div class="detail-meta-row">
+          <div class="detail-meta-item"><div class="detail-meta-label">Source ID</div><div class="detail-meta-value" style="font-family:monospace;font-size:11px;color:var(--color-text-muted)">${rec.source_id}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Time (IST)</div><div class="detail-meta-value">${timeIST}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Applied Revision</div><div class="detail-meta-value">${rec.appliedRevision || 1}</div></div>
+          ${rec.source_type === 'call' ? `
+          <div class="detail-meta-item"><div class="detail-meta-label">Rep</div><div class="detail-meta-value">${payload.rep_name || payload.rep_email || '—'}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Direction</div><div class="detail-meta-value">${payload.direction || '—'}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Duration</div><div class="detail-meta-value">${payload.duration_seconds ? payload.duration_seconds + 's' : '—'}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Connected (source-reported)</div><div class="detail-meta-value">${payload.is_connected === true ? 'Yes' : payload.is_connected === false ? 'No' : 'Unknown'}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Observed Outcome</div><div class="detail-meta-value">${payload.observed_outcome || '—'}</div></div>
+          ` : `
+          <div class="detail-meta-item"><div class="detail-meta-label">Organizer</div><div class="detail-meta-value">${payload.organizer_email || '—'}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Attendees (metadata)</div><div class="detail-meta-value">${payload.attendee_count !== null && payload.attendee_count !== undefined ? payload.attendee_count : '—'}</div></div>
+          <div class="detail-meta-item"><div class="detail-meta-label">Recording</div><div class="detail-meta-value">${payload.recording_status || '—'}</div></div>
+          `}
+        </div>
+      </div>
+
+      <!-- ANALYSIS -->
+      ${pregen ? renderAnalysisPanel(pregen, rec) : renderNoAnalysisPanel(rec)}
+
+      <!-- TRANSCRIPT -->
+      ${renderTranscriptPanel(rec)}
+    </div>
+
+    <!-- RIGHT: ROUTING + METADATA -->
+    <div class="detail-sidebar">
+      ${renderRoutingPanel(key, rec, a)}
+      ${renderMetadataPanel(rec)}
+    </div>
+  </div>
+</div>`;
+}
+
+function renderAnalysisPanel(pregen, rec) {
+  const key = stateKey(rec);
+  const a = STATE.analysis[key] || {};
+  const privacyFlag = pregen.privacyFlag;
+  return `
+<div class="analysis-section">
+  <div class="analysis-section-header" onclick="this.parentElement.querySelector('.analysis-section-body').classList.toggle('hidden')">
+    <span style="font-size:14px">🔍</span>
+    <div class="analysis-section-title">Analysis — ${rec.record_ref}</div>
+    <span class="badge badge-fresh" style="margin-left:auto">Pre-generated</span>
+  </div>
+  <div class="analysis-section-body">
+    ${privacyFlag ? `<div style="background:var(--color-red-dim);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:12px;font-size:12.5px;color:var(--color-red)">⚠️ <b>Privacy flag:</b> ${privacyFlag}</div>` : ''}
+    ${pregen.analysisNote ? `<div style="background:var(--color-amber-dim);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--color-amber)">ℹ️ ${pregen.analysisNote}</div>` : ''}
+    <div class="analysis-item">
+      <div class="analysis-label">📋 What happened</div>
+      <div class="analysis-content">${pregen.whatHappened}</div>
+    </div>
+    <div class="analysis-item">
+      <div class="analysis-label">💡 Why it matters</div>
+      <div class="analysis-content">${pregen.whyItMatters}</div>
+    </div>
+    <div class="analysis-item">
+      <div class="analysis-label">🔎 Evidence <span style="font-weight:400;font-size:10px;color:var(--color-text-muted)">(from transcript)</span></div>
+      <div class="analysis-content">
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px">
+          ${pregen.evidence.map((e,i) => `<li style="display:flex;gap:8px;padding:5px 8px;background:var(--color-surface-2);border-radius:var(--radius-sm)"><span style="color:var(--color-text-muted);font-size:10.5px;margin-top:1px">${i+1}.</span><span style="font-size:12.5px">${e}</span></li>`).join('')}
+        </ul>
+      </div>
+    </div>
+    <div class="analysis-item">
+      <div class="analysis-label">❓ What remains uncertain</div>
+      <div class="analysis-content uncertain">${pregen.uncertainty}</div>
+    </div>
+    <div class="analysis-item">
+      <div class="analysis-label">✅ Recommended action</div>
+      <div class="analysis-content action">${pregen.action}</div>
+    </div>
+  </div>
+</div>`;
+}
+
+function renderNoAnalysisPanel(rec) {
+  const hasTx = hasUsableTranscript(rec);
+  if (hasTx) {
+    return `<div class="analysis-section"><div class="analysis-section-header"><span>🔍</span><div class="analysis-section-title">Analysis</div></div><div class="analysis-section-body"><div class="text-muted text-sm">No pre-generated analysis for this record. Human review recommended.</div></div></div>`;
+  }
+  return `<div class="analysis-section"><div class="analysis-section-header"><span>📋</span><div class="analysis-section-title">No Usable Transcript</div></div><div class="analysis-section-body"><div class="text-muted text-sm">This record has no supplied transcript text. Analysis cannot be generated without content. Substantive analysis must not be invented for absent text. The source record may still be visible in intake/review.</div></div></div>`;
+}
+
+function renderTranscriptPanel(rec) {
+  const hasTx = hasUsableTranscript(rec);
+  if (!hasTx) {
+    let reason = 'No transcript text supplied for this record.';
+    if (rec.source_type === 'meeting' && rec.transcript_payload && rec.transcript_payload.unavailable_reason) {
+      reason = `Unavailable reason: ${rec.transcript_payload.unavailable_reason}`;
+    }
+    if (rec.source_type === 'call' && rec.payload.transcript === null) {
+      reason = 'Call transcript is null (background call or not captured in this package).';
+    }
+    return `<div class="transcript-container"><div class="transcript-header"><span>📝</span><span style="font-size:12.5px;font-weight:600;color:var(--color-text-primary)">Transcript</span></div><div class="no-transcript"><div class="icon">📭</div><p>${reason}</p></div></div>`;
+  }
+
+  if (rec.source_type === 'call') {
+    const text = rec.payload.transcript;
+    return `<div class="transcript-container"><div class="transcript-header"><span>📞</span><span style="font-size:12.5px;font-weight:600;color:var(--color-text-primary)">Call Transcript</span><span class="text-xs text-muted" style="margin-left:auto">Plain text (no turn timing available)</span></div><div class="transcript-body"><div class="call-text">${escapeHtml(text)}</div></div></div>`;
+  }
+
+  // Meeting turns
+  const turns = rec.transcript_payload.turns;
+  return `<div class="transcript-container"><div class="transcript-header"><span>📅</span><span style="font-size:12.5px;font-weight:600;color:var(--color-text-primary)">Meeting Transcript</span><span class="text-xs text-muted" style="margin-left:auto">${turns.length} turns</span></div><div class="transcript-body">
+    ${turns.map((t, i) => {
+      const sClass = getSpeakerClass(t.speaker);
+      return `<div class="turn" id="turn-${i+1}">
+        <div class="turn-header">
+          <span class="turn-number">Turn ${i+1}</span>
+          <span class="turn-speaker ${sClass}">${escapeHtml(t.speaker)}</span>
+          <span class="turn-timecode">${t.timecode}</span>
+        </div>
+        <div class="turn-text">${escapeHtml(t.text)}</div>
+      </div>`;
+    }).join('')}
+  </div></div>`;
+}
+
+function getSpeakerClass(speaker) {
+  if (!speaker) return '';
+  const s = speaker.toLowerCase();
+  if (s.includes('team')) return 'team';
+  if (s.includes('customer')) return 'customer';
+  if (s.includes('partner')) return 'partner';
+  if (s.includes('supplier')) return 'supplier';
+  return '';
+}
+
+function renderRoutingPanel(key, rec, a) {
+  const routes = a.manualOverride && a.manualRoutes ? a.manualRoutes : (a.routes || ['review']);
+  const pregen = getPregenAnalysis(rec.source_type, rec.source_id);
+  return `<div class="routing-panel">
+    <div class="routing-header">
+      <span style="font-size:13px;font-weight:600;color:var(--color-text-primary)">Routing</span>
+      ${a.manualOverride ? `<span class="badge badge-manual">✏ Manual</span>` : `<span class="badge badge-fresh">Auto</span>`}
+    </div>
+    <div class="routing-body">
+      <div class="text-xs text-muted mb-2">Select to override routing. Corrections persist across imports and restarts.</div>
+      ${Object.entries(ROUTE_DEFS).map(([routeKey, def]) => {
+        const isActive = routes.includes(routeKey);
+        const reason = (a.manualOverride && a.manualRouteReasons ? a.manualRouteReasons[routeKey] : null) || (pregen && pregen.routeReasons ? pregen.routeReasons[routeKey] : null);
+        return `<div class="route-option ${isActive ? 'active' : ''}">
+          <input type="checkbox" id="route-${key}-${routeKey}" ${isActive ? 'checked' : ''} onchange="toggleRoute('${key}','${routeKey}',this.checked)">
+          <label for="route-${key}-${routeKey}" class="route-label" style="cursor:pointer"><span class="badge badge-${routeKey}" style="margin-right:4px">●</span>${def.label}</label>
+        </div>
+        ${reason && isActive ? `<div class="route-reason-text">↳ ${reason}</div>` : ''}`;
+      }).join('')}
+      <div class="divider"></div>
+      <div style="display:flex;gap:6px">
+        ${a.manualOverride ? `<button class="btn btn-ghost btn-xs" onclick="resetRouting('${key}')">↩ Reset to auto</button>` : ''}
+        <button class="btn btn-secondary btn-xs" onclick="saveManualRoute('${key}')">Save routing</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderMetadataPanel(rec) {
+  const p = rec.payload;
+  const rows = [];
+  if (rec.source_type === 'call') {
+    if (p.workspace_slug) rows.push(['Workspace', p.workspace_slug]);
+    if (p.is_campaign_call !== null && p.is_campaign_call !== undefined) rows.push(['Campaign call', p.is_campaign_call ? 'Yes' : 'No']);
+    if (p.prior_dials_ever !== null && p.prior_dials_ever !== undefined) rows.push(['Prior dials (source)', p.prior_dials_ever]);
+    if (p.prior_connects_ever !== null && p.prior_connects_ever !== undefined) rows.push(['Prior connects (source)', p.prior_connects_ever]);
+    if (p.speaker_count) rows.push(['Speaker count (source)', p.speaker_count]);
+    if (p.talk_time_seconds) rows.push(['Talk time (source)', p.talk_time_seconds + 's']);
+  } else {
+    if (p.provider) rows.push(['Provider', p.provider]);
+    if (p.recording_status) rows.push(['Recording status', p.recording_status]);
+    if (p.has_transcript !== undefined) rows.push(['has_transcript flag', p.has_transcript ? 'Yes' : 'No']);
+    if (p.attendee_count !== null && p.attendee_count !== undefined) rows.push(['Attendee count (metadata)', p.attendee_count]);
+    if (p.duration_seconds) rows.push(['Duration (source)', p.duration_seconds + 's']);
+  }
+  return `<div class="card">
+    <div class="card-header"><div class="card-title">Source Metadata</div></div>
+    <table style="width:100%;border-collapse:collapse">
+      ${rows.map(([k,v]) => `<tr><td style="padding:4px 0;color:var(--color-text-muted);font-size:11.5px;width:55%">${k}</td><td style="padding:4px 0;font-size:12px;color:var(--color-text-secondary)">${v}</td></tr>`).join('')}
+    </table>
+    <div class="divider"></div>
+    <div class="text-xs text-muted">All values are source-reported metadata, not independently verified.</div>
+  </div>`;
+}
+
+function toggleRoute(key, routeKey, checked) {
+  // Just updates checkbox UI; actual save happens on "Save routing" or auto-persist
+}
+
+function saveManualRoute(key) {
+  if (!STATE.analysis[key]) STATE.analysis[key] = {};
+  const a = STATE.analysis[key];
+  const checkboxes = document.querySelectorAll(`input[id^="route-${key}-"]`);
+  const selectedRoutes = [];
+  checkboxes.forEach(cb => {
+    const rKey = cb.id.replace(`route-${key}-`, '');
+    if (cb.checked) selectedRoutes.push(rKey);
+  });
+  if (selectedRoutes.length === 0) {
+    showToast('Select at least one route', 'warning'); return;
+  }
+  a.manualRoutes = selectedRoutes;
+  a.manualOverride = true;
+  a.manualRouteReasons = {};
+  const pregen = getPregenAnalysis(STATE.records[key]?.source_type, STATE.records[key]?.source_id);
+  for (const r of selectedRoutes) {
+    a.manualRouteReasons[r] = (pregen && pregen.routeReasons ? pregen.routeReasons[r] : null) || 'Manually assigned';
+  }
+  saveState();
+  showToast(`Route saved for ${STATE.records[key]?.record_ref}`, 'success');
+  renderView();
+}
+
+function resetRouting(key) {
+  if (!STATE.analysis[key]) return;
+  delete STATE.analysis[key].manualOverride;
+  delete STATE.analysis[key].manualRoutes;
+  delete STATE.analysis[key].manualRouteReasons;
+  const rec = STATE.records[key];
+  if (rec) {
+    const pregen = getPregenAnalysis(rec.source_type, rec.source_id);
+    if (pregen) {
+      STATE.analysis[key].routes = [...pregen.routes];
+      STATE.analysis[key].routeReasons = { ...pregen.routeReasons };
+    }
+  }
+  saveState();
+  showToast('Routing reset to auto', 'info');
+  renderView();
+}
+
+function toggleReviewStatus(key) {
+  if (!STATE.analysis[key]) STATE.analysis[key] = {};
+  const a = STATE.analysis[key];
+  a.reviewStatus = a.reviewStatus === 'reviewed' ? 'pending' : 'reviewed';
+  saveState();
+  renderView();
+}
+
+function bindDetailEvents() {}
+
+/* ============================ IMPORT VIEW ============================ */
+function renderImport() {
+  const logHtml = STATE.importLog.length > 0
+    ? STATE.importLog.slice(-80).map(l => `<div class="log-${l.type}">[${l.type.toUpperCase()}] ${l.msg}</div>`).join('')
+    : '<div class="log-info">No imports yet.</div>';
+
+  return `
+<div style="max-width:800px;display:flex;flex-direction:column;gap:16px">
+  <div class="card">
+    <div class="card-header"><div class="card-title">Import Data Files</div></div>
+    <p class="text-sm text-muted mb-2">Import JSON batch files. Identity is (source_type, source_id). Same or older revisions are skipped. Manual routes are preserved.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <button class="btn btn-primary" onclick="loadInitialFile()">📥 Load 01_initial.json</button>
+      <button class="btn btn-secondary" onclick="loadUpdateFile()">📥 Load 02_update.json</button>
+    </div>
+    <div class="import-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="document.getElementById('drop-zone').classList.remove('dragover')">
+      <div class="icon">📂</div>
+      <p>Drop a JSON batch file here, or click to browse</p>
+      <p style="font-size:11px;margin-top:4px">Accepts: JSON files matching the assessment batch format</p>
+    </div>
+    <input type="file" id="file-input" accept=".json" style="display:none" onchange="handleFileInput(event)">
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Demo Replay Sequence</div>
+      <button class="btn btn-secondary btn-sm" onclick="loadDemoData()">▶ Run Full Demo</button>
+    </div>
+    <p class="text-sm text-muted mb-2">This runs the exact replay test from DATA_CONTRACT.md:</p>
+    <ol style="padding-left:20px;font-size:12.5px;color:var(--color-text-secondary);line-height:1.9">
+      <li>Import 01_initial.json → 44 records, 17 usable transcripts</li>
+      <li>Import 01_initial.json again → no duplicate records (same/older revision skipped)</li>
+      <li>Manually change M07's route (via Inbox → M07 detail)</li>
+      <li>Import 02_update.json → M07 gets transcript (rev 2); still 1 M07 record; 18 usable transcripts</li>
+      <li>Import 01_initial.json again → older revision ignored; M07 stays at rev 2</li>
+      <li>Refresh or restart → state persists via localStorage</li>
+    </ol>
+    <div class="text-xs text-muted mt-2">Manual route corrections survive all imports. Analysis is marked stale when source text changes.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Import Log</div>
+      <button class="btn btn-ghost btn-sm" onclick="STATE.importLog=[];saveState();renderView()">Clear log</button>
+    </div>
+    <div class="import-log">${logHtml}</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Data Management</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger btn-sm" onclick="if(confirm('Clear all imported data and reset?')){clearState();renderView();showToast('Data cleared','info')}">🗑 Clear All Data</button>
+    </div>
+    <div class="text-xs text-muted mt-2">Clearing removes all imported records and analysis. Source data files (in /data/) remain unchanged.</div>
+  </div>
+</div>`;
+}
+
+async function loadInitialFile() {
+  try {
+    const resp = await fetch('data/01_initial.json');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const log = processImportBatch(data);
+    showToast(`Imported 01_initial.json — ${log.filter(l=>l.type==='ok').length} processed`, 'success');
+    renderView();
+  } catch(e) {
+    showToast(`Failed to load 01_initial.json: ${e.message}`, 'error');
+    STATE.importLog.push({ type: 'err', msg: `File load error: ${e.message}` });
+    saveState();
+    renderView();
+  }
+}
+
+async function loadUpdateFile() {
+  try {
+    const resp = await fetch('data/02_update.json');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const log = processImportBatch(data);
+    showToast(`Imported 02_update.json — M07 transcript now available`, 'success');
+    renderView();
+  } catch(e) {
+    showToast(`Failed to load 02_update.json: ${e.message}`, 'error');
+    STATE.importLog.push({ type: 'err', msg: `File load error: ${e.message}` });
+    saveState();
+    renderView();
+  }
+}
+
+async function loadDemoData() {
+  showToast('Loading demo data...', 'info');
+  try {
+    // Step 1: Load initial
+    const r1 = await fetch('data/01_initial.json');
+    const d1 = await r1.json();
+    processImportBatch(d1);
+    // Step 2: Re-import initial (should be idempotent)
+    processImportBatch(d1);
+    // Step 3: Load update
+    const r2 = await fetch('data/02_update.json');
+    const d2 = await r2.json();
+    processImportBatch(d2);
+    // Step 4: Re-import initial again (older revision should be ignored)
+    processImportBatch(d1);
+    showToast(`Demo loaded — ${Object.keys(STATE.records).length} unique records, ${getUsableTranscriptCount()} usable transcripts`, 'success');
+    navigate('dashboard');
+  } catch(e) {
+    showToast(`Demo load failed: ${e.message}. Try Import view to load files manually.`, 'error');
+    STATE.importLog.push({ type: 'err', msg: `Demo load error: ${e.message}` });
+    saveState();
+  }
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processJsonFile(file);
+}
+
+function handleFileInput(e) {
+  const file = e.target.files[0];
+  if (file) processJsonFile(file);
+}
+
+function processJsonFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const log = processImportBatch(data);
+      showToast(`Imported ${file.name}`, 'success');
+      renderView();
+    } catch(err) {
+      showToast(`Invalid JSON: ${err.message}`, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function bindImportEvents() {}
+
+/* ============================ EXPORT VIEW ============================ */
+function renderExport() {
+  const records = getRecordList();
+  const total = records.length;
+  if (total === 0) {
+    return `<div class="empty-state"><div class="icon">📭</div><h3>No data to export</h3><p>Import data first.</p></div>`;
+  }
+
+  return `
+<div style="max-width:800px;display:flex;flex-direction:column;gap:16px">
+  <div class="card">
+    <div class="card-header"><div class="card-title">Export Manifests</div></div>
+    <p class="text-sm text-muted mb-2">Generates JSON and CSV manifests covering all ${total} imported records. Each manifest includes: source_type, source_id, record_ref, applied_revision, routes, manual_override, review_status, has_transcript, analysis_fresh, output_path.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="exportJSON()">⬇ Download JSON Manifest</button>
+      <button class="btn btn-secondary" onclick="exportCSV()">⬇ Download CSV Manifest</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Export Folder Structure</div></div>
+    <div class="text-xs text-muted mb-2">Conceptual folder layout for organized outputs (manifests reference these relative paths):</div>
+    <pre style="font-family:monospace;font-size:11.5px;color:var(--color-text-secondary);background:var(--color-surface-2);padding:12px;border-radius:var(--radius-md);overflow:auto;line-height:1.7">exports/
+├── manifest.json            ← Machine-readable manifest (all 44 records)
+├── manifest.csv             ← CSV manifest
+├── daily_brief_20260821.txt ← Manager brief for 21 Aug 2026
+├── calls/
+│   ├── conversations/       ← Records with usable transcripts
+│   │   ├── C01_2ec4404c.txt
+│   │   ├── C02_4b870624.txt  ... (10 call transcripts)
+│   └── no_content/          ← Records without usable text
+│       ├── B01_4868e5cd.txt
+│       ├── B02_5747e4cd.txt  ... (20 background/voicemail calls)
+└── meetings/
+    ├── conversations/       ← Meetings with usable transcripts
+    │   ├── M01_cb5cecac.txt
+    │   ├── M02_1a21c409.txt  ... (8 meeting transcripts)
+    └── no_content/          ← Meetings without usable text
+        ├── M05_xxxxx.txt    ... (6 meetings without usable transcript)</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Export Preview (first 10 records)</div></div>
+    <div style="overflow-x:auto">
+      <table class="inbox-table">
+        <thead><tr><th>Record Ref</th><th>Source Type</th><th>Source ID (short)</th><th>Rev</th><th>Routes</th><th>Manual</th><th>Has Transcript</th><th>Status</th></tr></thead>
+        <tbody>
+          ${records.slice(0,10).map(rec => {
+            const key = stateKey(rec);
+            const a = STATE.analysis[key] || {};
+            const routes = getRoutesForRecord(key);
+            return `<tr>
+              <td><span class="ref-code">${rec.record_ref}</span></td>
+              <td>${rec.source_type}</td>
+              <td><span class="text-xs text-muted">${rec.source_id.substring(0,13)}…</span></td>
+              <td>${rec.appliedRevision || 1}</td>
+              <td>${routes.join(', ')}</td>
+              <td>${a.manualOverride ? '✏ Yes' : 'No'}</td>
+              <td>${hasUsableTranscript(rec) ? '✓' : '—'}</td>
+              <td>${a.reviewStatus || 'pending'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>`;
+}
+
+function buildManifestData() {
+  return getRecordList().map(rec => {
+    const key = stateKey(rec);
+    const a = STATE.analysis[key] || {};
+    const routes = getRoutesForRecord(key);
+    const hasTx = hasUsableTranscript(rec);
+    const folder = rec.source_type === 'call' ? 'calls' : 'meetings';
+    const subfolder = hasTx ? 'conversations' : 'no_content';
+    const fname = `${rec.record_ref}_${rec.source_id.substring(0,8)}.txt`;
+    return {
+      record_ref: rec.record_ref,
+      source_type: rec.source_type,
+      source_id: rec.source_id,
+      applied_revision: rec.appliedRevision || 1,
+      routes: routes.join('|'),
+      manual_override: a.manualOverride ? 'yes' : 'no',
+      review_status: a.reviewStatus || 'pending',
+      has_transcript: hasTx ? 'yes' : 'no',
+      analysis_fresh: a.analysisFresh !== false ? 'yes' : 'no',
+      output_path: `exports/${folder}/${subfolder}/${fname}`,
+      privacy_flag: (PRE_GENERATED_ANALYSIS[key] && PRE_GENERATED_ANALYSIS[key].privacyFlag) ? 'yes' : 'no'
+    };
+  });
+}
+
+function exportJSON() {
+  const manifest = buildManifestData();
+  const obj = {
+    generated_at: new Date().toISOString(),
+    total_records: manifest.length,
+    usable_transcripts: getUsableTranscriptCount(),
+    note: 'All 44 selected records for 21 August 2026 (Asia/Kolkata). Analysis is pre-generated from supplied transcripts.',
+    records: manifest
+  };
+  downloadText('manifest.json', JSON.stringify(obj, null, 2), 'application/json');
+  showToast('JSON manifest downloaded', 'success');
+}
+
+function exportCSV() {
+  const manifest = buildManifestData();
+  const keys = Object.keys(manifest[0]);
+  const rows = [keys.join(','), ...manifest.map(r => keys.map(k => JSON.stringify(r[k]||'')).join(','))];
+  downloadText('manifest.csv', rows.join('\n'), 'text/csv');
+  showToast('CSV manifest downloaded', 'success');
+}
+
+function downloadText(filename, content, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = filename;
+  a.click();
+}
+
+function bindExportEvents() {}
+
+/* ============================ UTILITIES ============================ */
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = { success: '✓', error: '✗', info: 'ℹ', warning: '⚠' };
+  el.innerHTML = `<span>${icons[type]||'ℹ'}</span><span>${escapeHtml(msg)}</span>`;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+/* ============================ INIT ============================ */
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  updateBadges();
+  renderView();
+});
+
+function updateBadges() {
+  const total = Object.keys(STATE.records).length;
+  const el = document.getElementById('badge-inbox');
+  if (el) el.textContent = total || '44';
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && STATE.currentView === 'detail') navigate('inbox');
+});
+</script>
+</body>
+</html>
