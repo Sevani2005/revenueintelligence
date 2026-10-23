@@ -5,6 +5,14 @@ This is a single‑page, **offline‑ready** web application that implements the
 
 ---
 
+## 🚀 Live Demo
+
+**[https://sevani2005.github.io/revenueintelligence/app.html](https://sevani2005.github.io/revenueintelligence/app.html)**
+
+Click **Demo Load** after opening the link to run the full import-replay sequence and explore all features.
+
+---
+
 ## 1. Prerequisites
 - A modern browser (Chrome / Edge / Firefox) that supports ES2020 JavaScript.
 - **Because the app loads JSON files via `fetch()`, it must be served over HTTP** – opening `app.html` directly with a `file://` URL will trigger a CORS error.
